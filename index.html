@@ -254,10 +254,11 @@
     /* Gate positions — driven by JS each frame to track comet dot */
     #gw, #ga, #gs { top:0; left:0; }
 
-    .g-icon  { font-size:.9rem;  pointer-events:none; }
+    .g-icon  { font-size:1.1rem; pointer-events:none; }
     .g-label {
       font-family:'Cormorant Garamond', serif;
-      font-size:.5rem; letter-spacing:.2em;
+      font-size:1rem; letter-spacing:.28em;
+      font-weight:600;
       text-transform:uppercase; text-align:center;
       pointer-events:none; white-space:nowrap;
     }
@@ -344,9 +345,15 @@
       border:1px solid var(--border);
       padding:.72rem 2.2rem; border-radius:1px;
       cursor:pointer; white-space:nowrap;
-      animation:fup 1.2s ease 1.5s both,
-                 eglow var(--pulse) ease-in-out 2.8s infinite alternate;
+      animation:eglow var(--pulse) ease-in-out 2.8s infinite alternate;
       transition:background .25s, border-color .25s, box-shadow .25s;
+      opacity:0;
+      animation:enterFade 1.2s ease 1.5s forwards,
+                eglow var(--pulse) ease-in-out 2.8s infinite alternate;
+    }
+    @keyframes enterFade {
+      from { opacity:0; }
+      to   { opacity:1; }
     }
     #enter:hover {
       background:var(--gold-dim);
@@ -506,6 +513,19 @@
         <circle cx="59.2"  cy="68" r="24"/>
         <circle cx="59.2"  cy="92" r="24"/>
       </g>
+      <!-- Expanding FOL rings — faint concentric pulses breathing outward -->
+      <circle cx="80" cy="80" r="38"  stroke="rgba(252,211,77,0.10)" stroke-width=".6" fill="none">
+        <animate attributeName="r" values="38;46;38" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.10;0.02;0.10" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="80" cy="80" r="52"  stroke="rgba(252,211,77,0.07)" stroke-width=".5" fill="none">
+        <animate attributeName="r" values="52;62;52" dur="4s" begin="1.3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.07;0.01;0.07" dur="4s" begin="1.3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="80" cy="80" r="66"  stroke="rgba(155,114,207,0.05)" stroke-width=".4" fill="none">
+        <animate attributeName="r" values="66;78;66" dur="4s" begin="2.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.05;0.01;0.05" dur="4s" begin="2.6s" repeatCount="indefinite"/>
+      </circle>
     </svg>
     <!-- Upward triangle — spins CW -->
     <svg id="mk-out" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"
@@ -607,112 +627,123 @@
     <!-- CENTER MOUNTAIN — REMOVED intentionally.
          The Merkaba + spiral own that center space. -->
 
-    <!-- LEFT MOUNTAIN — FOREGROUND
-         Peak pulled down to y=175 so it clears the spiral.
-         Wide base, organic silhouette, layered ridges for depth. -->
+    <!-- ══ LEFT MOUNTAIN RANGE — 4 layers, furthest to closest ══
+         Each layer progressively darker as it comes forward.
+         Eyes follow the receding range inward to center. -->
 
-    <!-- Left far-ridge (mid-distance, slightly lighter) -->
+    <!-- LEFT — layer 1: furthest back, most atmospheric/faint -->
     <path d="
-      M -30 400
-      L  20 355 Q  50 330  80 308
-      Q 110 285 135 265
-      Q 158 246 172 232
-      Q 186 218 196 206
-      Q 206 194 214 185
-      Q 220 177 228 175
-      Q 236 168 244 175
-      Q 252 168 260 175
-      Q 270 183 282 196
-      Q 296 212 316 232
-      Q 338 255 364 278
-      L 420 340 L 450 400 Z
-    " fill="url(#mgLeft)" opacity=".55"/>
+      M -200 400 L -140 358 Q -110 334 -82 312
+      Q  -52 288  -28 266 Q    0 244   18 226
+      Q   34 210   46 198 Q   56 188   64 196
+      Q   72 188   80 196 Q   92 208  108 226
+      Q  126 248  148 272 Q  172 298  200 326
+      L  260 378 L 285 400 Z
+    " fill="url(#mgLeft)" opacity=".14"/>
 
-    <!-- Left near-ridge (foreground, full opacity, slightly lower peak) -->
+    <!-- LEFT — layer 2: second back -->
     <path d="
-      M -30 400
-      L  15 368 Q  38 348  62 330
-      Q  88 310 110 292
-      Q 132 273 148 256
-      Q 164 239 178 222
-      Q 192 206 202 193
-      Q 210 182 218 192
-      Q 226 183 234 192
-      Q 244 203 258 220
-      Q 274 240 294 260
-      Q 316 282 340 304
-      Q 366 326 394 350
-      L 440 390 L 460 400 Z
+      M -120 400 L  -62 364 Q  -34 342   -8 322
+      Q   20 300   42 280 Q   62 262   78 246
+      Q   92 230  102 218 Q  112 206  120 198
+      Q  128 190  136 198 Q  144 190  152 198
+      Q  164 210  180 228 Q  198 250  220 274
+      Q  244 300  272 328 L  330 372 L 358 400 Z
+    " fill="url(#mgLeft)" opacity=".28"/>
+
+    <!-- LEFT — layer 3: mid-distance -->
+    <path d="
+      M -30 400 L   20 358 Q   50 332   80 310
+      Q  110 287  134 267 Q  156 248  170 234
+      Q  184 220  194 208 Q  204 196  212 188
+      Q  220 180  228 188 Q  236 180  244 188
+      Q  256 200  272 218 Q  292 240  316 264
+      Q  342 290  370 318 L  424 368 L 452 400 Z
+    " fill="url(#mgLeft)" opacity=".50"/>
+
+    <!-- LEFT — layer 4: foreground, closest, darkest -->
+    <path d="
+      M -30 400 L   15 370 Q   38 350   62 332
+      Q   88 312  110 294 Q  132 275  148 258
+      Q  164 241  178 224 Q  192 208  202 195
+      Q  210 184  218 194 Q  226 185  234 194
+      Q  244 205  258 222 Q  274 242  294 262
+      Q  316 284  340 306 Q  366 328  394 352
+      L  440 392 L 462 400 Z
     " fill="url(#mgLeft)"/>
-    <!-- Left near peak gold highlight -->
+    <!-- Left foreground peak gold highlight -->
     <path d="
-      M 212 200 Q 218 186 226 183
-      Q 234 192 240 200
-      Q 232 195 226 194
-      Q 219 195 212 200 Z
+      M 212 202 Q 218 188 226 185
+      Q 234 194 240 202
+      Q 232 197 226 196 Q 219 197 212 202 Z
     " fill="url(#peakLeft)" opacity=".85"/>
-    <!-- Left shoulder ridge line -->
-    <path d="M 112 296 Q 158 256 200 212"
+    <!-- Left shoulder ridge -->
+    <path d="M 112 298 Q 158 258 200 214"
       fill="none" stroke="rgba(252,211,77,0.06)" stroke-width="1.4"/>
-    <!-- Left rock shadow detail -->
-    <path d="M 68 328 Q 108 292 148 256"
-      fill="none" stroke="rgba(0,0,25,0.24)" stroke-width="2.0"/>
-    <!-- Left scree fog base -->
-    <path d="M 20 380 Q 120 355 240 348 Q 340 344 440 365 L 460 400 L -30 400 Z"
-      fill="rgba(8,5,18,0.38)"/>
-
-    <!-- RIGHT MOUNTAIN — FOREGROUND
-         Mirror of left — peak at y=175, clears spiral. -->
-
-    <!-- Right far-ridge -->
-    <path d="
-      M 1030 400
-      L  980 355 Q  950 330  920 308
-      Q  890 285  865 265
-      Q  842 246  828 232
-      Q  814 218  804 206
-      Q  794 194  786 185
-      Q  780 177  772 175
-      Q  764 168  756 175
-      Q  748 168  740 175
-      Q  730 183  718 196
-      Q  704 212  684 232
-      Q  662 255  636 278
-      L  580 340 L 550 400 Z
-    " fill="url(#mgRight)" opacity=".55"/>
-
-    <!-- Right near-ridge -->
-    <path d="
-      M 1030 400
-      L  985 368 Q  962 348  938 330
-      Q  912 310  890 292
-      Q  868 273  852 256
-      Q  836 239  822 222
-      Q  808 206  798 193
-      Q  790 182  782 192
-      Q  774 183  766 192
-      Q  756 203  742 220
-      Q  726 240  706 260
-      Q  684 282  660 304
-      Q  634 326  606 350
-      L  560 390 L 540 400 Z
-    " fill="url(#mgRight)"/>
-    <!-- Right near peak violet highlight -->
-    <path d="
-      M 788 200 Q 782 186 774 183
-      Q 766 192 760 200
-      Q 768 195 774 194
-      Q 781 195 788 200 Z
-    " fill="url(#peakRight)" opacity=".85"/>
-    <!-- Right shoulder ridge line -->
-    <path d="M 888 296 Q 842 256 800 212"
-      fill="none" stroke="rgba(200,170,255,0.06)" stroke-width="1.4"/>
-    <!-- Right rock shadow detail -->
-    <path d="M 932 328 Q 892 292 852 256"
+    <!-- Left rock shadow -->
+    <path d="M 68 330 Q 108 294 148 258"
       fill="none" stroke="rgba(0,0,25,0.22)" stroke-width="2.0"/>
-    <!-- Right scree fog base -->
-    <path d="M 1010 380 Q 910 355 760 348 Q 660 344 560 365 L 540 400 L 1030 400 Z"
+    <!-- Left base scree -->
+    <path d="M 20 382 Q 120 357 240 350 Q 340 346 440 367 L 462 400 L -30 400 Z"
       fill="rgba(8,5,18,0.36)"/>
+
+    <!-- ══ RIGHT MOUNTAIN RANGE — 4 layers, furthest to closest ══ -->
+
+    <!-- RIGHT — layer 1: furthest back, most atmospheric/faint -->
+    <path d="
+      M 1200 400 L 1140 358 Q 1110 334 1082 312
+      Q 1052 288 1028 266 Q 1000 244  982 226
+      Q  966 210  954 198 Q  944 188  936 196
+      Q  928 188  920 196 Q  908 208  892 226
+      Q  874 248  852 272 Q  828 298  800 326
+      L  740 378 L 715 400 Z
+    " fill="url(#mgRight)" opacity=".14"/>
+
+    <!-- RIGHT — layer 2: second back -->
+    <path d="
+      M 1120 400 L 1062 364 Q 1034 342 1008 322
+      Q  980 300  958 280 Q  938 262  922 246
+      Q  908 230  898 218 Q  888 206  880 198
+      Q  872 190  864 198 Q  856 190  848 198
+      Q  836 210  820 228 Q  802 250  780 274
+      Q  756 300  728 328 L  670 372 L 642 400 Z
+    " fill="url(#mgRight)" opacity=".28"/>
+
+    <!-- RIGHT — layer 3: mid-distance -->
+    <path d="
+      M 1030 400 L  980 358 Q  950 332  920 310
+      Q  890 287  866 267 Q  844 248  830 234
+      Q  816 220  806 208 Q  796 196  788 188
+      Q  780 180  772 188 Q  764 180  756 188
+      Q  744 200  728 218 Q  708 240  684 264
+      Q  658 290  630 318 L  576 368 L 548 400 Z
+    " fill="url(#mgRight)" opacity=".50"/>
+
+    <!-- RIGHT — layer 4: foreground, closest, darkest -->
+    <path d="
+      M 1030 400 L  985 370 Q  962 350  938 332
+      Q  912 312  890 294 Q  868 275  852 258
+      Q  836 241  822 224 Q  808 208  798 195
+      Q  790 184  782 194 Q  774 185  766 194
+      Q  756 205  742 222 Q  726 242  706 262
+      Q  684 284  660 306 Q  634 328  606 352
+      L  560 392 L 538 400 Z
+    " fill="url(#mgRight)"/>
+    <!-- Right foreground peak violet highlight -->
+    <path d="
+      M 788 202 Q 782 188 774 185
+      Q 766 194 760 202
+      Q 768 197 774 196 Q 781 197 788 202 Z
+    " fill="url(#peakRight)" opacity=".85"/>
+    <!-- Right shoulder ridge -->
+    <path d="M 888 298 Q 842 258 800 214"
+      fill="none" stroke="rgba(200,170,255,0.06)" stroke-width="1.4"/>
+    <!-- Right rock shadow -->
+    <path d="M 932 330 Q 892 294 852 258"
+      fill="none" stroke="rgba(0,0,25,0.20)" stroke-width="2.0"/>
+    <!-- Right base scree -->
+    <path d="M 1010 382 Q 910 357 760 350 Q 660 346 560 367 L 538 400 L 1030 400 Z"
+      fill="rgba(8,5,18,0.34)"/>
 
     <!-- Ground and atmosphere -->
     <rect x="-30" y="375" width="1060" height="25" fill="#04040c"/>
@@ -754,7 +785,7 @@
 
   <!-- Hero text -->
   <div id="hero">
-    <span class="h-pre">World Innovation · Akasha · Astra</span>
+    <span class="h-pre">WISE · AKASHA · ASTRA</span>
     <h1 class="h-title">In Flame and In Faith,<br>We Rise</h1>
     <p class="h-sub">Choose your path. Follow the spiral. Find your threshold.</p>
   </div>
@@ -789,6 +820,52 @@
      ═══════════════════════════════════════════════ -->
 <script>
 'use strict';
+
+/* ══════════════════════════════════════════════════
+   6. BACKGROUND STARS
+   Scattered static points in deep space outside the
+   triskelion spiral boundary. Drawn once to a starfield
+   canvas behind everything at z-index 0.5.
+   Mix of white and faint gold. Sizes 0.5–2px.
+══════════════════════════════════════════════════ */
+(function buildStars() {
+  const sc = document.createElement('canvas');
+  sc.style.cssText = 'position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%;';
+  sc.width  = window.innerWidth;
+  sc.height = window.innerHeight;
+  document.getElementById('stage').insertBefore(sc, document.getElementById('star-sys'));
+  const sx = sc.getContext('2d');
+  const cx2 = sc.width / 2, cy2 = sc.height / 2;
+  const minR = Math.min(sc.width, sc.height) * 0.42; // stay outside triskelion
+  const rng = (n) => Math.random() * n;
+
+  for (let i = 0; i < 280; i++) {
+    // Random position anywhere on canvas
+    const x = rng(sc.width);
+    const y = rng(sc.height);
+    // Skip if inside triskelion radius
+    const dx = x - cx2, dy = y - cy2;
+    if (Math.sqrt(dx*dx + dy*dy) < minR) continue;
+
+    const size  = 0.4 + Math.random() * 1.4;
+    const gold  = Math.random() < 0.12; // 12% gold
+    const alpha = 0.15 + Math.random() * 0.55;
+
+    sx.beginPath();
+    sx.arc(x, y, size, 0, Math.PI * 2);
+    if (gold) {
+      sx.fillStyle = `rgba(252,211,77,${alpha.toFixed(2)})`;
+      sx.shadowColor = 'rgba(252,211,77,0.4)';
+      sx.shadowBlur  = 4;
+    } else {
+      sx.fillStyle = `rgba(228,228,240,${alpha.toFixed(2)})`;
+      sx.shadowColor = 'rgba(228,228,240,0.2)';
+      sx.shadowBlur  = 2;
+    }
+    sx.fill();
+    sx.shadowBlur = 0;
+  }
+})();
 
 /* ══════════════════════════════════════════════════
    1. CURSOR
