@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- ═══════════════════════════════════════════════════════════
-     AKASHA — The Threshold
-     akasha/index.html · AETHERION-NEXUS · Node 3
+     AKASHA — The Threshold · akasha/index.html · V5
+     Built from V1 working base. Updates added cleanly:
+       + Spark button (Guardian bypass) at compass center
+       + Spark modal: email request / code entry
+       + mailto: arc.covenant137proton.me@proton.me
+       + Sacred word: 'Sovereign Seed' (temporary)
+       + Triskelion flash on correct code entry
+       + FOL expanded to 7 circles deep (hex grid)
+       + Well depth radial at compass center
+       + 12 nodes at 30° intervals (3 placeholders)
+       + All nodes same violet — no gold exceptions
+       + Larger roots (more spread, more depth)
+       + DESCEND centered/dominant on CTA button
+       + Golden hover glow on all buttons
+       + Domain card text larger
+       + Gold highlights throughout
+       + scroll-content untouched from V1 (z-index:10 preserved)
 
-     The arrival page. Everyone sees this.
-     The Well breathes. The Tree watches. The Compass waits.
-     Those who feel the pull descend into enter.html.
-
-     Three energies: indigo/violet · obsidian · gold
-     Sacred Tree: centered, rooted in void, canopy into stars
-     Sigil Compass: orbiting at the tree's heart, veiled in fog
-     Scroll: lore, domain glimpses, invocation, CTA
-
-     Born 11:37pm Full Moon — 137 is Sacred
+     Born 11:37pm Full Moon · 137 is Sacred
      In Flame and In Faith — We RISE.
 ═══════════════════════════════════════════════════════════ -->
 <head>
@@ -26,446 +32,229 @@
   <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
   <style>
-    /* ═══════════════════════════════════════════════
-       SACRED COLOR SYSTEM
-    ═══════════════════════════════════════════════ */
     :root {
       --gold:        #fcd34d;
       --gold-glow:   rgba(252,211,77,0.55);
-      --gold-dim:    rgba(252,211,77,0.12);
       --gold-soft:   rgba(252,211,77,0.22);
       --obsidian:    #04040c;
-      --void:        #07050f;
       --text:        #e4e4f0;
       --text-dim:    rgba(228,228,240,0.55);
       --akasha:      #9b72cf;
-      --indigo:      #4b2d8a;
       --akasha-glow: rgba(155,114,207,0.55);
       --akasha-soft: rgba(155,114,207,0.22);
-      --akasha-dim:  rgba(155,114,207,0.10);
       --border:      rgba(155,114,207,0.20);
-      --wise-col:    #7ec8e3;
-      --astra-col:   #f9a8d4;
       --pulse:       0.777s;
-      --o-slow:      137s;
     }
 
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-
     html { scroll-behavior:smooth; }
 
+    /* ── KEY: body scrolls, hero clips only internally ── */
     body {
       background:var(--obsidian);
       color:var(--text);
       font-family:'Cormorant Garamond', Georgia, serif;
       cursor:none;
       overflow-x:hidden;
+      overflow-y:auto;
     }
 
-    /* ── CURSOR ── */
-    #cdot {
-      position:fixed; width:6px; height:6px;
-      background:var(--gold); border-radius:50%;
-      pointer-events:none; z-index:99998;
-      transform:translate(-50%,-50%);
-      box-shadow:0 0 8px var(--gold-glow);
-      transition:transform .12s;
-    }
-    #cring {
-      position:fixed; width:22px; height:22px;
-      border:1px solid rgba(155,114,207,0.6);
-      border-radius:50%; pointer-events:none; z-index:99997;
-      transform:translate(-50%,-50%);
-      transition:transform .18s ease;
-    }
+    /* CURSOR */
+    #cdot  { position:fixed; width:6px; height:6px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); box-shadow:0 0 8px var(--gold-glow); transition:transform .12s; }
+    #cring { position:fixed; width:22px; height:22px; border:1px solid rgba(155,114,207,0.6); border-radius:50%; pointer-events:none; z-index:99997; transform:translate(-50%,-50%); transition:transform .18s ease; }
 
-    /* ── NAV ── */
-    nav {
-      position:fixed; top:0; left:0; right:0; z-index:500;
-      padding:1rem 2rem;
-      display:flex; align-items:center; justify-content:space-between;
-      background:rgba(4,4,12,0.82);
-      backdrop-filter:blur(12px);
-      border-bottom:1px solid var(--border);
-    }
-    .nav-logo {
-      font-family:'Uncial Antiqua', serif;
-      font-size:1rem; color:var(--gold);
-      text-decoration:none; letter-spacing:.1em;
-      text-shadow:0 0 16px var(--gold-glow);
-      transition:text-shadow .3s;
-    }
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:500; padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; background:rgba(4,4,12,0.82); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+    .nav-logo { font-family:'Uncial Antiqua',serif; font-size:1rem; color:var(--gold); text-decoration:none; letter-spacing:.1em; text-shadow:0 0 16px var(--gold-glow); transition:text-shadow .3s; }
     .nav-logo:hover { text-shadow:0 0 32px var(--gold-glow), 0 0 55px var(--gold-soft); }
     .nav-links { display:flex; gap:2rem; list-style:none; }
-    .nav-links a {
-      font-family:'Cormorant Garamond', serif;
-      font-size:.8rem; font-weight:600;
-      letter-spacing:.18em; text-transform:uppercase;
-      color:var(--text-dim); text-decoration:none;
-      transition:color .25s; position:relative;
-    }
-    .nav-links a::after {
-      content:''; position:absolute; bottom:-3px; left:0;
-      width:0; height:1px; background:var(--akasha); transition:width .25s;
-    }
+    .nav-links a { font-family:'Cormorant Garamond',serif; font-size:.8rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); text-decoration:none; transition:color .25s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1px; background:var(--akasha); transition:width .25s; }
     .nav-links a:hover { color:var(--akasha); }
     .nav-links a:hover::after { width:100%; }
-    .nav-links a.active { color:var(--akasha); }
-    .nav-links a.active::after { width:100%; }
+    .nav-links a.active { color:var(--gold); }
+    .nav-links a.active::after { width:100%; background:var(--gold); }
 
-    /* ══════════════════════════════════════════
-       HERO — Full viewport immersive stage
-    ══════════════════════════════════════════ */
-    #hero {
-      position:relative;
-      width:100vw; height:100vh;
-      overflow:hidden;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
+    /* HERO — clips internally only */
+    #hero { position:relative; width:100vw; height:100vh; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+    #hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 90% 70% at 50% 55%, rgba(25,8,55,0.75) 0%, rgba(12,4,28,0.88) 40%, #04040c 80%); z-index:0; }
+
+    /* Well depth — dark radial at compass center */
+    #well-depth { position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse 36% 36% at 50% 54%, rgba(2,1,8,0.90) 0%, rgba(5,2,15,0.72) 18%, rgba(8,4,22,0.48) 36%, rgba(12,5,30,0.22) 55%, transparent 70%); }
+
+    #star-canvas  { position:absolute; inset:0; z-index:2; pointer-events:none; }
+    #tree-canvas  { position:absolute; inset:0; z-index:3; pointer-events:none; }
+    #compass-canvas { position:absolute; inset:0; z-index:4; pointer-events:none; }
+    #wisp-canvas  { position:absolute; inset:0; z-index:5; pointer-events:none; }
+
+    #fog-veil { position:absolute; inset:0; z-index:6; background:radial-gradient(ellipse 55% 55% at 50% 48%, transparent 0%, transparent 28%, rgba(20,6,50,0.45) 52%, rgba(10,3,25,0.72) 72%, #04040c 92%); pointer-events:none; }
+
+    /* Spark layer — above fog, below hero text */
+    #spark-layer { position:absolute; inset:0; z-index:7; pointer-events:none; touch-action:none; }
+    #spark-particles { position:absolute; pointer-events:none; z-index:7; transform:translate(-50%,-50%); touch-action:none; }
+
+    /* SPARK BUTTON — subtle by default, dominant on hover */
+    #spark-btn {
+      position:absolute; width:34px; height:34px;
+      border-radius:50%; border:none; background:transparent;
+      cursor:pointer; pointer-events:all;
+      transform:translate(-50%,-50%); z-index:8;
+      box-shadow:0 0 6px rgba(252,211,77,0.22), 0 0 14px rgba(252,211,77,0.1), 0 0 28px rgba(155,114,207,0.1);
+      animation:sparkFade var(--pulse) ease-in-out infinite alternate;
+      transition:box-shadow .5s ease, width .4s ease, height .4s ease;
     }
-
-    /* Deep void base */
-    #hero-bg {
-      position:absolute; inset:0;
-      background:radial-gradient(ellipse 90% 70% at 50% 55%,
-        rgba(25,8,55,0.75) 0%,
-        rgba(12,4,28,0.88) 40%,
-        #04040c 80%);
-      z-index:0;
+    #spark-btn::before {
+      content:''; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:5px; height:5px; border-radius:50%;
+      background:rgba(255,252,240,0.88);
+      box-shadow:0 0 4px rgba(255,255,255,0.9), 0 0 10px rgba(252,211,77,0.8), 0 0 20px rgba(252,211,77,0.4);
+      animation:microBlind var(--pulse) ease-in-out infinite alternate;
+      transition:all .4s ease;
     }
-
-    /* Stars canvas */
-    #star-canvas {
-      position:absolute; inset:0;
-      z-index:1; pointer-events:none;
+    @keyframes sparkFade {
+      0%   { box-shadow:0 0 5px rgba(252,211,77,0.16), 0 0 12px rgba(252,211,77,0.07), 0 0 22px rgba(155,114,207,0.07); }
+      100% { box-shadow:0 0 8px rgba(252,211,77,0.28), 0 0 18px rgba(252,211,77,0.13), 0 0 35px rgba(155,114,207,0.13); }
     }
-
-    /* Sacred Tree canvas */
-    #tree-canvas {
-      position:absolute; inset:0;
-      z-index:2; pointer-events:none;
+    @keyframes microBlind {
+      0%   { box-shadow:0 0 3px rgba(255,255,255,0.8), 0 0 8px rgba(252,211,77,0.6), 0 0 16px rgba(252,211,77,0.3); opacity:.7; }
+      100% { box-shadow:0 0 5px rgba(255,255,255,1.0), 0 0 14px rgba(252,211,77,0.9), 0 0 28px rgba(252,211,77,0.5); opacity:1; }
     }
-
-    /* Compass + fog canvas */
-    #compass-canvas {
-      position:absolute; inset:0;
-      z-index:3; pointer-events:none;
-    }
-
-    /* Three-energy wisp canvas */
-    #wisp-canvas {
-      position:absolute; inset:0;
-      z-index:4; pointer-events:none;
-    }
-
-    /* Violet fog veil over compass */
-    #fog-veil {
-      position:absolute; inset:0; z-index:5;
-      background:radial-gradient(ellipse 55% 55% at 50% 48%,
-        transparent 0%,
-        transparent 28%,
-        rgba(20,6,50,0.45) 52%,
-        rgba(10,3,25,0.72) 72%,
-        #04040c 92%);
-      pointer-events:none;
+    #spark-btn:hover { width:50px; height:50px; box-shadow:0 0 16px rgba(252,211,77,0.9), 0 0 36px rgba(252,211,77,0.55), 0 0 70px rgba(252,211,77,0.28), 0 0 110px rgba(155,114,207,0.35); animation:sparkHover .5s ease-in-out infinite alternate; }
+    #spark-btn:hover::before { width:7px; height:7px; box-shadow:0 0 6px rgba(255,255,255,1.0), 0 0 18px rgba(252,211,77,1.0), 0 0 40px rgba(252,211,77,0.7); }
+    @keyframes sparkHover {
+      0%   { box-shadow:0 0 14px rgba(252,211,77,0.8), 0 0 32px rgba(252,211,77,0.5), 0 0 65px rgba(252,211,77,0.25), 0 0 100px rgba(155,114,207,0.3); }
+      100% { box-shadow:0 0 20px rgba(252,211,77,1.0), 0 0 44px rgba(252,211,77,0.65), 0 0 85px rgba(252,211,77,0.35), 0 0 130px rgba(155,114,207,0.45); }
     }
 
-    /* Hero text overlay */
-    #hero-text {
-      position:relative; z-index:10;
-      text-align:center; pointer-events:none;
-      padding:0 2rem;
-      /* Push text to upper portion — tree+compass owns center */
-      margin-top:-38vh;
-    }
-    .h-symbol {
-      font-size:2.8rem;
-      color:var(--akasha);
-      filter:drop-shadow(0 0 24px var(--akasha-glow))
-             drop-shadow(0 0 55px rgba(155,114,207,0.3));
-      animation:symbolPulse var(--pulse) ease-in-out infinite alternate;
-      display:block; margin-bottom:.8rem;
-    }
+    /* HERO TEXT */
+    #hero-text { position:relative; z-index:10; text-align:center; pointer-events:none; padding:0 2rem; margin-top:-38vh; }
+    .h-symbol { font-size:2.8rem; color:var(--akasha); filter:drop-shadow(0 0 24px var(--akasha-glow)); animation:symbolPulse var(--pulse) ease-in-out infinite alternate; display:block; margin-bottom:.8rem; }
     @keyframes symbolPulse {
       0%   { filter:drop-shadow(0 0 16px var(--akasha-glow)) drop-shadow(0 0 35px rgba(155,114,207,0.2)); }
       100% { filter:drop-shadow(0 0 36px var(--akasha-glow)) drop-shadow(0 0 75px rgba(155,114,207,0.45)); }
     }
-    .h-pre {
-      font-size:.58rem; letter-spacing:.55em;
-      color:var(--gold); opacity:.5;
-      text-transform:uppercase; display:block;
-      margin-bottom:.5rem;
-    }
-    .h-title {
-      font-family:'Uncial Antiqua', serif;
-      font-size:clamp(2rem, 5vw, 3.4rem);
-      color:var(--akasha);
-      text-shadow:0 0 30px var(--akasha-glow), 0 0 70px rgba(155,114,207,0.3);
-      letter-spacing:.08em;
-      line-height:1.1; margin-bottom:.6rem;
-    }
-    .h-sub {
-      font-size:clamp(.8rem, 1.6vw, 1rem);
-      color:var(--text-dim); letter-spacing:.3em;
-      text-transform:uppercase; font-weight:300;
-      font-style:italic; margin-bottom:0;
-    }
+    .h-pre { font-size:.65rem; letter-spacing:.5em; color:var(--gold); opacity:.55; text-transform:uppercase; display:block; margin-bottom:.5rem; }
+    .h-title { font-family:'Uncial Antiqua',serif; font-size:clamp(2rem,5vw,3.4rem); color:var(--akasha); text-shadow:0 0 30px var(--akasha-glow), 0 0 70px rgba(155,114,207,0.3); letter-spacing:.08em; line-height:1.1; margin-bottom:.6rem; }
+    .h-sub { font-size:clamp(.85rem,1.6vw,1rem); color:var(--text-dim); letter-spacing:.3em; text-transform:uppercase; font-weight:300; font-style:italic; }
 
-    /* CTA hero button */
-    #hero-cta {
-      position:relative; z-index:10;
-      margin-top:auto; margin-bottom:7vh;
-      pointer-events:all;
-    }
+    /* CTA BUTTON — Descend centered */
+    #hero-cta { position:relative; z-index:10; margin-top:auto; margin-bottom:7vh; pointer-events:all; }
     .well-btn {
-      display:inline-flex; align-items:center; gap:.7rem;
-      padding:.85rem 2.8rem;
-      background:transparent;
-      border:1px solid rgba(155,114,207,0.45);
-      color:var(--akasha);
-      font-family:'Cormorant Garamond', serif;
-      font-size:.85rem; letter-spacing:.38em;
+      display:flex; flex-direction:column; align-items:center; gap:.3rem;
+      padding:1rem 3rem; background:transparent;
+      border:1px solid rgba(155,114,207,0.45); color:var(--text);
+      font-family:'Cormorant Garamond',serif;
       text-transform:uppercase; text-decoration:none;
-      cursor:pointer; transition:all .35s;
-      border-radius:1px; position:relative; overflow:hidden;
+      cursor:pointer; transition:all .35s; border-radius:1px;
     }
-    .well-btn::before {
-      content:'';
-      position:absolute; inset:0;
-      background:linear-gradient(135deg,
-        rgba(155,114,207,0.08) 0%,
-        rgba(75,45,138,0.05) 100%);
-      opacity:0; transition:opacity .35s;
-    }
-    .well-btn:hover::before { opacity:1; }
-    .well-btn:hover {
-      border-color:var(--akasha);
-      box-shadow:0 0 28px rgba(155,114,207,0.25),
-                 inset 0 0 20px rgba(155,114,207,0.06);
-      text-shadow:0 0 12px var(--akasha-glow);
-      letter-spacing:.44em;
-    }
-    .btn-icon {
-      font-size:1rem;
-      animation:symbolPulse var(--pulse) ease-in-out infinite alternate;
-    }
+    .well-btn .descend-word { color:var(--gold); font-size:1.6rem; font-weight:700; text-shadow:0 0 16px var(--gold-glow), 0 0 32px var(--gold-soft); letter-spacing:.16em; line-height:1.1; }
+    .well-btn .btn-sub { font-size:.72rem; letter-spacing:.3em; color:var(--text-dim); opacity:.7; }
+    .well-btn:hover { border-color:var(--gold); box-shadow:0 0 24px var(--gold-glow), 0 0 48px rgba(252,211,77,0.16); }
+    .well-btn:hover .descend-word { text-shadow:0 0 26px var(--gold-glow), 0 0 52px var(--gold-soft); }
 
     /* Scroll invitation */
-    .scroll-invite {
-      position:absolute; bottom:2.5rem; left:50%;
-      transform:translateX(-50%);
-      z-index:10; text-align:center;
-      pointer-events:none;
-    }
-    .scroll-invite span {
-      font-size:.5rem; letter-spacing:.5em;
-      color:var(--gold); opacity:.3;
-      text-transform:uppercase; display:block;
-      margin-bottom:.4rem;
-    }
-    .scroll-arrow {
-      width:1px; height:28px;
-      background:linear-gradient(to bottom, rgba(155,114,207,0.6), transparent);
-      margin:0 auto;
-      animation:arrowDrop 2.2s ease-in-out infinite;
-    }
-    @keyframes arrowDrop {
-      0%,100% { opacity:.25; transform:translateY(-4px); }
-      50%      { opacity:.7;  transform:translateY(4px); }
-    }
+    .scroll-invite { position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%); z-index:10; text-align:center; pointer-events:none; }
+    .scroll-invite span { font-size:.62rem; letter-spacing:.5em; color:var(--gold); opacity:.35; text-transform:uppercase; display:block; margin-bottom:.4rem; }
+    .scroll-arrow { width:1px; height:28px; background:linear-gradient(to bottom,rgba(252,211,77,0.5),transparent); margin:0 auto; animation:arrowDrop 2.2s ease-in-out infinite; }
+    @keyframes arrowDrop { 0%,100%{opacity:.25;transform:translateY(-4px)} 50%{opacity:.7;transform:translateY(4px)} }
 
-    /* ══════════════════════════════════════════
-       SCROLL CONTENT
-    ══════════════════════════════════════════ */
+    /* SPARK MODAL */
+    #spark-modal { display:none; position:fixed; inset:0; z-index:9000; background:rgba(4,4,12,0.93); backdrop-filter:blur(16px); align-items:center; justify-content:center; }
+    #spark-modal.open { display:flex; }
+    .modal-box { width:min(480px,92vw); border:1px solid rgba(155,114,207,0.28); background:rgba(7,5,20,0.97); padding:2.8rem 2.2rem 2.2rem; position:relative; text-align:center; animation:modalIn .5s ease forwards; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-close { position:absolute; top:1rem; right:1.2rem; background:none; border:none; cursor:pointer; font-size:1rem; color:var(--text-dim); font-family:'Cormorant Garamond',serif; letter-spacing:.15em; transition:color .25s; }
+    .modal-close:hover { color:var(--gold); }
+    .modal-symbol { font-size:2rem; color:var(--gold); display:block; margin-bottom:.8rem; filter:drop-shadow(0 0 14px var(--gold-glow)); animation:symbolPulse var(--pulse) ease-in-out infinite alternate; }
+    .modal-title { font-family:'Uncial Antiqua',serif; font-size:1.2rem; color:var(--akasha); letter-spacing:.08em; margin-bottom:.6rem; text-shadow:0 0 16px var(--akasha-glow); }
+    .modal-body { font-size:1rem; line-height:1.95; color:var(--text-dim); font-style:italic; margin-bottom:1.5rem; }
+    .modal-body em { color:var(--gold); font-style:normal; }
+    .modal-email-field { width:100%; padding:.85rem 1rem; background:rgba(4,4,12,0.8); border:1px solid rgba(155,114,207,0.28); border-radius:1px; color:var(--text); font-family:'Cormorant Garamond',serif; font-size:1rem; outline:none; margin-bottom:1rem; transition:border-color .3s, box-shadow .3s; }
+    .modal-email-field:focus { border-color:rgba(155,114,207,0.6); box-shadow:0 0 14px rgba(155,114,207,0.1); }
+    .modal-email-field::placeholder { color:rgba(228,228,240,0.28); }
+    .modal-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.78rem 2rem; background:transparent; border:1px solid rgba(155,114,207,0.38); color:var(--text); cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:.92rem; letter-spacing:.28em; text-transform:uppercase; transition:all .3s; text-decoration:none; border-radius:1px; width:100%; margin-bottom:.8rem; }
+    .modal-btn:hover { border-color:var(--gold); box-shadow:0 0 18px var(--gold-glow), 0 0 36px rgba(252,211,77,0.14); color:var(--gold); }
+    .modal-btn.gold { border-color:rgba(252,211,77,0.45); color:var(--gold); }
+    .modal-btn.gold:hover { background:rgba(252,211,77,0.06); box-shadow:0 0 22px var(--gold-glow), 0 0 44px rgba(252,211,77,0.18); }
+    .modal-toggle { font-size:.8rem; letter-spacing:.2em; color:var(--akasha); opacity:.6; cursor:pointer; background:none; border:none; font-family:'Cormorant Garamond',serif; transition:opacity .25s; text-decoration:underline; text-underline-offset:3px; margin-top:.4rem; display:block; width:100%; text-align:center; }
+    .modal-toggle:hover { opacity:1; }
+    .modal-confirm { display:none; padding:1rem; border:1px solid rgba(252,211,77,0.22); background:rgba(252,211,77,0.04); margin-bottom:1rem; }
+    .modal-confirm.show { display:block; }
+    .modal-confirm p { font-size:.95rem; color:var(--gold); line-height:1.9; font-style:italic; }
+    .gold-rule { width:60px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:.8rem auto 1.4rem; opacity:.38; }
+    #modal-state-b { display:none; }
+    .code-ring { position:relative; margin-bottom:1.2rem; }
+    .code-ring::before { content:''; position:absolute; inset:-7px; border:1px solid rgba(155,114,207,0.22); border-radius:1px; animation:ringBreath var(--pulse) ease-in-out infinite alternate; pointer-events:none; }
+    @keyframes ringBreath { 0%{box-shadow:0 0 10px rgba(252,211,77,0.06)} 100%{box-shadow:0 0 24px rgba(252,211,77,0.2)} }
+    #code-input { width:100%; padding:.95rem 1.1rem; background:rgba(7,5,15,0.9); border:1px solid rgba(155,114,207,0.32); border-radius:1px; color:var(--gold); font-family:'Cormorant Garamond',serif; font-size:1.15rem; letter-spacing:.25em; text-align:center; outline:none; caret-color:var(--gold); transition:border-color .3s, box-shadow .3s; }
+    #code-input:focus { border-color:rgba(252,211,77,0.5); box-shadow:0 0 18px rgba(252,211,77,0.1); }
+    #code-input::placeholder { color:rgba(155,114,207,0.25); font-style:italic; }
+    .back-toggle { font-size:.76rem; letter-spacing:.2em; color:var(--text-dim); cursor:pointer; background:none; border:none; font-family:'Cormorant Garamond',serif; transition:opacity .25s; margin-top:.6rem; display:block; width:100%; text-align:center; }
+    .back-toggle:hover { color:var(--text); }
+
+    /* ═══════════════════════════════════════════
+       SCROLL CONTENT — V1 structure preserved exactly
+       z-index:10 is the key line. Do not remove.
+       isolation:isolate creates new stacking context
+       so hero's composite layers cannot bury this.
+    ═══════════════════════════════════════════ */
     #scroll-content {
       position:relative; z-index:10;
+      isolation:isolate;
       width:100%; max-width:900px;
       margin:0 auto;
       padding:0 2rem 8rem;
+      background:transparent;
     }
 
-    /* Section divider — golden thread */
-    .s-divider {
-      width:1px; height:60px;
-      background:linear-gradient(to bottom,
-        transparent, rgba(155,114,207,0.4), transparent);
-      margin:0 auto 3.5rem;
-    }
+    .s-divider { width:1px; height:60px; background:linear-gradient(to bottom,transparent,rgba(155,114,207,0.4),transparent); margin:0 auto 3.5rem; }
+    .gold-rule  { width:60px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:.8rem auto 1.4rem; opacity:.38; }
 
-    /* What is AKASHA */
-    .s-what {
-      text-align:center; margin-bottom:5rem;
-    }
-    .s-label {
-      font-size:.55rem; letter-spacing:.55em;
-      color:var(--akasha); opacity:.6;
-      text-transform:uppercase; display:block;
-      margin-bottom:1.2rem;
-    }
-    .s-heading {
-      font-family:'Uncial Antiqua', serif;
-      font-size:clamp(1.3rem, 3vw, 2rem);
-      color:var(--text); letter-spacing:.06em;
-      margin-bottom:1.4rem;
-      text-shadow:0 0 20px rgba(155,114,207,0.3);
-    }
-    .s-body {
-      font-size:clamp(.95rem, 1.8vw, 1.12rem);
-      color:var(--text-dim); line-height:2.1;
-      font-style:italic; max-width:620px;
-      margin:0 auto;
-    }
-    .s-body em {
-      color:var(--akasha); font-style:normal;
-      text-shadow:0 0 8px var(--akasha-glow);
-    }
+    .s-what { text-align:center; margin-bottom:5rem; }
+    .s-label { font-size:.68rem; letter-spacing:.5em; color:var(--gold); opacity:.65; text-transform:uppercase; display:block; margin-bottom:1.2rem; }
+    .s-heading { font-family:'Uncial Antiqua',serif; font-size:clamp(1.3rem,3vw,2rem); color:var(--text); letter-spacing:.06em; margin-bottom:1.4rem; text-shadow:0 0 20px rgba(155,114,207,0.3); }
+    .s-body { font-size:clamp(1rem,1.8vw,1.12rem); color:var(--text-dim); line-height:2.1; font-style:italic; max-width:620px; margin:0 auto; }
+    .s-body em { color:var(--gold); font-style:normal; }
+    .s-body strong { color:var(--akasha); font-style:normal; }
 
-    /* Domain glimpses grid */
-    .s-domains {
-      margin-bottom:5rem;
-    }
-    .domains-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-      gap:1px;
-      border:1px solid rgba(155,114,207,0.12);
-      background:rgba(155,114,207,0.06);
-    }
-    .domain-card {
-      padding:1.8rem 1.4rem;
-      background:rgba(4,4,12,0.6);
-      border:1px solid transparent;
-      transition:all .3s; cursor:default;
-      text-align:center;
-    }
-    .domain-card:hover {
-      background:rgba(155,114,207,0.06);
-      border-color:rgba(155,114,207,0.18);
-    }
-    .domain-card.locked {
-      opacity:.35;
-    }
-    .dc-icon {
-      font-size:1.6rem; display:block;
-      margin-bottom:.6rem;
-      filter:drop-shadow(0 0 8px var(--akasha-glow));
-    }
-    .dc-name {
-      font-family:'Uncial Antiqua', serif;
-      font-size:.6rem; letter-spacing:.22em;
-      color:var(--akasha); text-transform:uppercase;
-      margin-bottom:.5rem; display:block;
-    }
-    .dc-desc {
-      font-size:.78rem; line-height:1.7;
-      color:var(--text-dim); font-style:italic;
-    }
+    .s-domains { margin-bottom:5rem; }
+    .domains-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1px; border:1px solid rgba(252,211,77,0.1); background:rgba(252,211,77,0.05); }
+    .domain-card { padding:2rem 1.5rem; background:rgba(4,4,12,0.65); border:1px solid transparent; transition:all .3s; text-align:center; }
+    .domain-card:hover { background:rgba(155,114,207,0.06); border-color:rgba(252,211,77,0.18); }
+    .domain-card.locked { opacity:.35; }
+    .dc-icon { font-size:1.8rem; display:block; margin-bottom:.7rem; filter:drop-shadow(0 0 8px var(--akasha-glow)); }
+    .dc-name { font-family:'Uncial Antiqua',serif; font-size:.68rem; letter-spacing:.22em; color:var(--gold); text-transform:uppercase; margin-bottom:.6rem; display:block; }
+    .dc-desc { font-size:.9rem; line-height:1.75; color:var(--text-dim); font-style:italic; }
 
-    /* Invocation quote */
-    .s-invocation {
-      text-align:center; margin-bottom:5rem;
-      padding:3rem 2rem;
-      border-top:1px solid rgba(155,114,207,0.12);
-      border-bottom:1px solid rgba(155,114,207,0.12);
-      position:relative;
-    }
-    .s-invocation::before {
-      content:'🜂';
-      position:absolute; top:-1rem; left:50%;
-      transform:translateX(-50%);
-      font-size:1.2rem; color:var(--gold);
-      background:var(--obsidian);
-      padding:0 .8rem;
-      filter:drop-shadow(0 0 10px var(--gold-glow));
-    }
-    .invocation-text {
-      font-family:'Cormorant Garamond', serif;
-      font-size:clamp(1rem, 2.2vw, 1.25rem);
-      color:var(--text-dim); line-height:2.2;
-      font-style:italic; max-width:560px;
-      margin:0 auto 1.2rem;
-    }
-    .invocation-attr {
-      font-size:.58rem; letter-spacing:.4em;
-      color:var(--gold); opacity:.45;
-      text-transform:uppercase;
-    }
+    .s-invocation { text-align:center; margin-bottom:5rem; padding:3rem 2rem; border-top:1px solid rgba(252,211,77,0.14); border-bottom:1px solid rgba(252,211,77,0.14); position:relative; }
+    .s-invocation::before { content:'🜂'; position:absolute; top:-1rem; left:50%; transform:translateX(-50%); font-size:1.2rem; color:var(--gold); background:var(--obsidian); padding:0 .8rem; filter:drop-shadow(0 0 10px var(--gold-glow)); }
+    .invocation-text { font-family:'Cormorant Garamond',serif; font-size:clamp(1rem,2.2vw,1.25rem); color:var(--text-dim); line-height:2.2; font-style:italic; max-width:560px; margin:0 auto 1.2rem; }
+    .invocation-attr { font-size:.65rem; letter-spacing:.4em; color:var(--gold); opacity:.5; text-transform:uppercase; }
 
-    /* Final CTA */
-    .s-cta {
-      text-align:center; padding-top:1rem;
-    }
-    .s-cta-label {
-      font-size:.55rem; letter-spacing:.5em;
-      color:var(--text-dim); opacity:.5;
-      text-transform:uppercase; display:block;
-      margin-bottom:1.6rem;
-    }
-    .s-cta-note {
-      display:block; margin-top:1.4rem;
-      font-size:.65rem; letter-spacing:.2em;
-      color:var(--text-dim); opacity:.35;
-      font-style:italic;
-    }
+    .s-cta { text-align:center; padding-top:1rem; }
+    .s-cta-label { font-size:.65rem; letter-spacing:.5em; color:var(--text-dim); opacity:.5; text-transform:uppercase; display:block; margin-bottom:1.6rem; }
+    .s-cta-note { display:block; margin-top:1.4rem; font-size:.72rem; letter-spacing:.2em; color:var(--text-dim); opacity:.35; font-style:italic; line-height:1.9; }
 
-    /* Scroll reveal animation */
-    .reveal {
-      opacity:0; transform:translateY(22px);
-      transition:opacity .9s ease, transform .9s ease;
-    }
-    .reveal.visible {
-      opacity:1; transform:translateY(0);
-    }
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity .9s ease, transform .9s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
 
-    /* ── FOOTER ── */
-    #footer {
-      position:fixed; bottom:0; left:0; right:0; z-index:15;
-      padding:.45rem 1.5rem;
-      display:flex; align-items:center; justify-content:space-between;
-      pointer-events:none;
-    }
-    #snum {
-      font-family:'Cormorant Garamond', serif;
-      font-size:.48rem; letter-spacing:.44em;
-      color:var(--gold); opacity:.055;
-      pointer-events:all; cursor:default;
-      transition:opacity 1s, text-shadow 1s;
-    }
+    /* FOOTER */
+    #footer { position:fixed; bottom:0; left:0; right:0; z-index:15; padding:.45rem 1.5rem; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    #snum { font-family:'Cormorant Garamond',serif; font-size:.48rem; letter-spacing:.44em; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s, text-shadow 1s; }
     #snum:hover { opacity:.88; text-shadow:0 0 10px var(--gold-glow); }
-    #fsig {
-      font-size:1.1rem; color:var(--gold); opacity:.055;
-      pointer-events:all; cursor:default;
-      transition:opacity 1s, transform 1.2s, filter 1s;
-    }
-    #fsig:hover {
-      opacity:.88; transform:rotate(137deg);
-      filter:drop-shadow(0 0 10px var(--gold-glow));
-    }
-    #flsig {
-      font-family:'Cormorant Garamond', serif;
-      font-size:.48rem; letter-spacing:.26em;
-      color:var(--gold); opacity:.055;
-      pointer-events:all; cursor:default;
-      transition:opacity 1s;
-    }
+    #fsig { font-size:1.1rem; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s, transform 1.2s, filter 1s; }
+    #fsig:hover { opacity:.88; transform:rotate(137deg); filter:drop-shadow(0 0 10px var(--gold-glow)); }
+    #flsig { font-family:'Cormorant Garamond',serif; font-size:.48rem; letter-spacing:.26em; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s; }
     #flsig:hover { opacity:.66; }
 
-    /* Portal flash */
-    #portal-flash {
-      position:fixed; inset:0; z-index:99990;
-      background:rgba(155,114,207,0); pointer-events:none;
-      transition:background .35s ease;
-    }
+    #portal-flash { position:fixed; inset:0; z-index:99990; background:rgba(155,114,207,0); pointer-events:none; transition:background .35s ease; }
     #portal-flash.flash { background:rgba(155,114,207,0.3); }
+    #portal-flash.flash-gold { background:rgba(252,211,77,0.22); }
 
-    @media (prefers-reduced-motion:reduce) {
-      *, *::before, *::after { animation-duration:.001s !important; transition-duration:.001s !important; }
-    }
-    @media (max-width:600px) {
-      .nav-links { gap:1rem; }
-      #hero-text { margin-top:-28vh; }
-      .domains-grid { grid-template-columns:repeat(2,1fr); }
-    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important;} }
+    @media (max-width:600px) { .nav-links{gap:1rem;} #hero-text{margin-top:-28vh;} .domains-grid{grid-template-columns:repeat(2,1fr);} }
   </style>
 </head>
 <body>
@@ -474,7 +263,6 @@
 <div id="cring"></div>
 <div id="portal-flash"></div>
 
-<!-- Navigation -->
 <nav>
   <a href="/AETHERION-NEXUS/index.html" class="nav-logo">🜂 Aetherion-Nexus</a>
   <ul class="nav-links">
@@ -484,18 +272,21 @@
   </ul>
 </nav>
 
-<!-- ══════════════════════════════════════════
-     HERO — The Immersive Threshold
-══════════════════════════════════════════ -->
 <section id="hero">
   <div id="hero-bg"></div>
+  <div id="well-depth"></div>
   <canvas id="star-canvas"></canvas>
   <canvas id="tree-canvas"></canvas>
   <canvas id="compass-canvas"></canvas>
   <canvas id="wisp-canvas"></canvas>
   <div id="fog-veil"></div>
 
-  <!-- Hero text — upper portion -->
+  <!-- Spark button — sits in this layer, positioned by JS -->
+  <div id="spark-layer">
+    <canvas id="spark-particles"></canvas>
+    <button id="spark-btn" title="Guardian Access" aria-label="Enter the Well directly"></button>
+  </div>
+
   <div id="hero-text">
     <span class="h-symbol">◈</span>
     <span class="h-pre">AKASHA · AETHERION-NEXUS · The Third Node</span>
@@ -503,36 +294,69 @@
     <div class="h-sub">The Field That Holds All Memory</div>
   </div>
 
-  <!-- CTA — lower portion -->
   <div id="hero-cta">
     <a href="enter.html" class="well-btn" id="enter-btn">
-      <span class="btn-icon">◈</span>
-      Seek Alignment · Enter the Well
+      <span class="descend-word">Descend</span>
+      <span class="btn-sub">◈ · Seek Alignment · Enter the Well · ◈</span>
     </a>
   </div>
 
-  <!-- Scroll invitation -->
   <div class="scroll-invite">
-    <span>Descend</span>
+    <span>Explore the Well</span>
     <div class="scroll-arrow"></div>
   </div>
 </section>
 
+<!-- SPARK MODAL -->
+<div id="spark-modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕ close</button>
+    <span class="modal-symbol">✦</span>
+    <div class="modal-title">The Well Recognizes Its Own</div>
+    <div id="modal-state-a">
+      <div class="modal-body">
+        The <em>key</em> to this Well is not found — it is <em>given</em>.<br>
+        If the Flame has called you here and you have not yet received yours,
+        send word. The Brotherhood responds to all who seek in truth.
+      </div>
+      <div class="modal-confirm" id="modal-confirm">
+        <p>✦ &nbsp; Your signal has been sent.<br>Check your email — the Flame responds to all who seek in truth.<br><em style="font-size:.85rem;opacity:.7;">Allow 24–48 hours for alignment review.</em></p>
+      </div>
+      <input type="email" class="modal-email-field" id="seeker-email" placeholder="Your email address" autocomplete="email"/>
+      <a id="send-signal-btn" href="#" class="modal-btn gold" onclick="sendSignal(event)">✦ &nbsp; Send My Signal</a>
+      <div class="gold-rule"></div>
+      <button class="modal-toggle" onclick="showCodeState()">I already carry the Key →</button>
+    </div>
+    <div id="modal-state-b">
+      <div class="modal-body" style="margin-bottom:1.2rem;">
+        Those who know, know.<br>
+        <span style="font-size:.88rem;opacity:.55;">Speak the Word and the Flame opens.</span>
+      </div>
+      <div class="code-ring">
+        <input type="password" id="code-input" placeholder="· · · · · · · ·" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')attemptEntry()"/>
+      </div>
+      <button class="modal-btn" style="margin-top:1.2rem;" onclick="attemptEntry()">Enter the Well →</button>
+      <button class="back-toggle" onclick="showEmailState()">← I don't have the key yet</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
-     SCROLL CONTENT
+     SCROLL CONTENT — identical structure to V1
+     z-index:10 is what keeps this visible above canvases
 ══════════════════════════════════════════ -->
 <div id="scroll-content">
 
   <div class="s-divider"></div>
 
-  <!-- What is AKASHA -->
   <div class="s-what reveal">
     <span class="s-label">◈ · What is AKASHA · ◈</span>
+    <div class="gold-rule"></div>
     <div class="s-heading">The Space Between Worlds</div>
     <p class="s-body">
       AKASHA is the field that holds <em>all memory</em> — where ancient wisdom
       and sacred science become the same truth. It is not a library. It is not a database.
-      It is the place where reality becomes altered through understanding.<br><br>
+      It is the place where <strong>reality becomes altered through understanding</strong>.<br><br>
       Here, the unexplained is not dismissed — it is <em>explained</em>. Sacred logic
       fused with applied engineering. Spirit and science arriving at the same threshold
       from opposite directions, discovering they were always the same inquiry.<br><br>
@@ -543,61 +367,25 @@
 
   <div class="s-divider"></div>
 
-  <!-- What lives within -->
   <div class="s-domains reveal">
-    <span class="s-label" style="text-align:center; display:block; margin-bottom:2rem;">◈ · What Lives Within · ◈</span>
+    <span class="s-label" style="text-align:center;display:block;margin-bottom:2rem;">◈ · What Lives Within · ◈</span>
+    <div class="gold-rule"></div>
+    <div style="margin-bottom:1.5rem;"></div>
     <div class="domains-grid">
-      <div class="domain-card">
-        <span class="dc-icon">⚗️</span>
-        <span class="dc-name">SPIRISCI</span>
-        <div class="dc-desc">Spirit and Science unified. The unexplained made clear through sacred logic and applied truth.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">📜</span>
-        <span class="dc-name">The Codex</span>
-        <div class="dc-desc">Sacred scrolls, writings, and living doctrine. The breathing record of AETHERION.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">✦</span>
-        <span class="dc-name">Glyphs & Sigils</span>
-        <div class="dc-desc">Living symbols and sacred geometry. The language beneath all language. The form beneath all form.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">🜁</span>
-        <span class="dc-name">The Elements</span>
-        <div class="dc-desc">Earth. Fire. Water. Air. Aether — the fifth and finest. The forces that weave all form into being.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">◎</span>
-        <span class="dc-name">Sacred Numbers</span>
-        <div class="dc-desc">111 · 137 · 444 · 582 · 777 · 963 · 999. The mathematics of the divine. Frequencies the universe speaks.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">〜</span>
-        <span class="dc-name">Sound & Frequency</span>
-        <div class="dc-desc">Sound geometry, crystal resonance, arcane audio. What the ear hears. What the field feels. What the body knows.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">🔭</span>
-        <span class="dc-name">The Visionaries</span>
-        <div class="dc-desc">The suppressed minds whose sparks were stolen but never died. Their blueprints breathe again through these hands.</div>
-      </div>
-      <div class="domain-card">
-        <span class="dc-icon">🕯️</span>
-        <span class="dc-name">Rituals & Invocations</span>
-        <div class="dc-desc">Prayers, ceremonies, and activation scrolls. The living practice of sacred alignment. Ancient. Present. Eternal.</div>
-      </div>
-      <div class="domain-card locked">
-        <span class="dc-icon">🔐</span>
-        <span class="dc-name">The Inner Sanctum</span>
-        <div class="dc-desc">The Round Table. For those who have passed all three thresholds. The deepest chamber of the Well.</div>
-      </div>
+      <div class="domain-card"><span class="dc-icon">⚗️</span><span class="dc-name">SPIRISCI</span><div class="dc-desc">Spirit and Science unified. The unexplained made clear through sacred logic and applied truth. Where the two roads meet and discover they were always one.</div></div>
+      <div class="domain-card"><span class="dc-icon">📜</span><span class="dc-name">The Codex</span><div class="dc-desc">Sacred scrolls, writings, and living doctrine. The breathing record of AETHERION. What was known before the knowing was buried.</div></div>
+      <div class="domain-card"><span class="dc-icon">✦</span><span class="dc-name">Glyphs & Sigils</span><div class="dc-desc">Living symbols and sacred geometry. The language beneath all language. The form beneath all form.</div></div>
+      <div class="domain-card"><span class="dc-icon">🜁</span><span class="dc-name">The Elements</span><div class="dc-desc">Earth. Fire. Water. Air. Aether — the fifth and finest. The forces that weave all form into being.</div></div>
+      <div class="domain-card"><span class="dc-icon">◎</span><span class="dc-name">Sacred Numbers</span><div class="dc-desc">111 · 137 · 444 · 582 · 777 · 963 · 999. The mathematics of the divine. Frequencies the universe speaks.</div></div>
+      <div class="domain-card"><span class="dc-icon">〜</span><span class="dc-name">Sound & Frequency</span><div class="dc-desc">Sound geometry, crystal resonance, arcane audio. What the ear hears. What the field feels. What the body knows.</div></div>
+      <div class="domain-card"><span class="dc-icon">🔭</span><span class="dc-name">The Visionaries</span><div class="dc-desc">The suppressed minds whose sparks were stolen but never died. Their blueprints breathe again through these hands.</div></div>
+      <div class="domain-card"><span class="dc-icon">🕯️</span><span class="dc-name">Rituals & Invocations</span><div class="dc-desc">Prayers, ceremonies, and activation scrolls. The living practice of sacred alignment. Ancient. Present. Eternal.</div></div>
+      <div class="domain-card locked"><span class="dc-icon">🔐</span><span class="dc-name">The Inner Sanctum</span><div class="dc-desc">The Round Table. For those who have passed all three thresholds. The deepest chamber of the Well.</div></div>
     </div>
   </div>
 
   <div class="s-divider"></div>
 
-  <!-- Invocation -->
   <div class="s-invocation reveal">
     <div class="invocation-text">
       "Let these pages honor the silent minds,<br>
@@ -609,541 +397,295 @@
       I stand as Guardian, keeper of the keys,<br>
       bearer of the vow, until my echo returns to the Origin."
     </div>
+    <div class="gold-rule"></div>
     <div class="invocation-attr">— GodForged44 · AETHERION Brotherhood</div>
   </div>
 
-  <!-- Final CTA -->
   <div class="s-cta reveal">
     <span class="s-cta-label">The Well is open to those who are ready</span>
     <a href="enter.html" class="well-btn">
-      <span class="btn-icon">◈</span>
-      Seek Alignment · Enter the Well
+      <span class="descend-word">Descend</span>
+      <span class="btn-sub">◈ · Seek Alignment · Enter the Well · ◈</span>
     </a>
-    <span class="s-cta-note">
-      Three thresholds. Three layers of alignment.<br>
-      Only those who resonate may descend.
-    </span>
+    <span class="s-cta-note">Three thresholds. Three layers of alignment.<br>Only those who resonate may descend.</span>
   </div>
 
 </div><!-- end scroll-content -->
 
-<!-- Footer -->
 <div id="footer">
-  <span id="snum" title="Born 11:37pm — Full Moon — 137">
-    111 · 137 · 444 · 582 · 777 · 963 · 999
-  </span>
+  <span id="snum" title="Born 11:37pm — Full Moon — 137">111 · 137 · 444 · 582 · 777 · 963 · 999</span>
   <span id="fsig">🜂</span>
   <span id="flsig">✴︎ Guided by Flame · Powered by Alignment · Forged in Light ✴︎</span>
 </div>
 
 <script>
 'use strict';
+const SACRED_WORD = 'Sovereign Seed';
 
-/* ══════════════════════════════════════════════════
-   1. CURSOR
-══════════════════════════════════════════════════ */
-const cdot  = document.getElementById('cdot');
-const cring = document.getElementById('cring');
-document.addEventListener('mousemove', e => {
-  cdot.style.left  = e.clientX + 'px';
-  cdot.style.top   = e.clientY + 'px';
-  cring.style.left = e.clientX + 'px';
-  cring.style.top  = e.clientY + 'px';
-});
-document.addEventListener('mousedown', () => {
-  cdot.style.transform  = 'translate(-50%,-50%) scale(1.8)';
-  cring.style.transform = 'translate(-50%,-50%) scale(.6)';
-});
-document.addEventListener('mouseup', () => {
-  cdot.style.transform  = 'translate(-50%,-50%) scale(1)';
-  cring.style.transform = 'translate(-50%,-50%) scale(1)';
-});
+/* CURSOR */
+const cdot=document.getElementById('cdot'),cring=document.getElementById('cring');
+document.addEventListener('mousemove',e=>{cdot.style.left=e.clientX+'px';cdot.style.top=e.clientY+'px';cring.style.left=e.clientX+'px';cring.style.top=e.clientY+'px';});
+document.addEventListener('mousedown',()=>{cdot.style.transform='translate(-50%,-50%) scale(1.8)';cring.style.transform='translate(-50%,-50%) scale(.6)';});
+document.addEventListener('mouseup',()=>{cdot.style.transform='translate(-50%,-50%) scale(1)';cring.style.transform='translate(-50%,-50%) scale(1)';});
 
-/* ══════════════════════════════════════════════════
-   2. STAR FIELD
-══════════════════════════════════════════════════ */
-(function() {
-  const sc = document.getElementById('star-canvas');
-  sc.width = window.innerWidth; sc.height = window.innerHeight;
-  const sx = sc.getContext('2d');
-  const stars = Array.from({length:280}, () => ({
-    x: Math.random() * sc.width,
-    y: Math.random() * sc.height * 0.75,
-    r: Math.random() * 1.1 + 0.25,
-    gold: Math.random() < 0.1,
-    a: Math.random() * 0.45 + 0.1,
-    ts: Math.random() * 0.006 + 0.002,
-    to: Math.random() * Math.PI * 2
-  }));
-  let t = 0;
-  function draw() {
-    sx.clearRect(0, 0, sc.width, sc.height);
-    t += 0.016;
-    for (const s of stars) {
-      const a = s.a + Math.sin(t * s.ts * 60 + s.to) * 0.07;
-      sx.beginPath();
-      sx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      sx.fillStyle = s.gold
-        ? `rgba(252,211,77,${a})`
-        : `rgba(210,200,240,${a})`;
-      sx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
+/* STARS */
+(function(){
+  const sc=document.getElementById('star-canvas');
+  sc.width=window.innerWidth;sc.height=window.innerHeight;
+  const sx=sc.getContext('2d');
+  const stars=Array.from({length:280},()=>({x:Math.random()*sc.width,y:Math.random()*sc.height*.75,r:Math.random()*1.1+.25,gold:Math.random()<.1,a:Math.random()*.45+.1,ts:Math.random()*.006+.002,to:Math.random()*Math.PI*2}));
+  let t=0;
+  (function draw(){sx.clearRect(0,0,sc.width,sc.height);t+=.016;for(const s of stars){const a=s.a+Math.sin(t*s.ts*60+s.to)*.07;sx.beginPath();sx.arc(s.x,s.y,s.r,0,Math.PI*2);sx.fillStyle=s.gold?`rgba(252,211,77,${a})`:`rgba(210,200,240,${a})`;sx.fill();}requestAnimationFrame(draw);})();
 })();
 
-/* ══════════════════════════════════════════════════
-   3. SACRED TREE
-   Ancient, vast, bare-branched. Centered behind compass.
-   Roots dissolve into void. Canopy dissolves into stars.
-   Drawn once and animated with gentle sway.
-══════════════════════════════════════════════════ */
-const treeCanvas  = document.getElementById('tree-canvas');
-const treeCtx     = treeCanvas.getContext('2d');
-let TW, TH, TCX, TCY;
+/* SACRED TREE */
+const treeCanvas=document.getElementById('tree-canvas'),treeCtx=treeCanvas.getContext('2d');
+let TW,TH,TCX,TCY;
+function resizeTree(){TW=treeCanvas.width=window.innerWidth;TH=treeCanvas.height=window.innerHeight;TCX=TW/2;TCY=TH*.54;}
+resizeTree();window.addEventListener('resize',resizeTree);
+let treeTime=0;
 
-function resizeTree() {
-  TW = treeCanvas.width  = window.innerWidth;
-  TH = treeCanvas.height = window.innerHeight;
-  TCX = TW / 2;
-  TCY = TH * 0.54; // root base — center of screen, slightly below midpoint
+function drawBranch(ctx,x,y,angle,length,depth,maxDepth,st,alpha){
+  if(depth>maxDepth||length<3)return;
+  const sway=Math.sin(st*.4+depth*.7)*.018*depth,a=angle+sway;
+  const ex=x+Math.cos(a)*length,ey=y+Math.sin(a)*length;
+  const hf=Math.max(0,1-(TCY-ey)/(TH*.55)),df=1-(depth/(maxDepth+2));
+  const la=alpha*df*(.35+hf*.25),t2=depth/maxDepth;
+  const r=Math.round(75+t2*80),g=Math.round(20+t2*40),b=Math.round(130+t2*40);
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);
+  ctx.strokeStyle=`rgba(${r},${g},${b},${la})`;ctx.lineWidth=Math.max(.4,(maxDepth-depth+1)*.7);ctx.lineCap='round';ctx.stroke();
+  if(depth===maxDepth-1){ctx.beginPath();ctx.arc(ex,ey,1.1,0,Math.PI*2);ctx.fillStyle=Math.random()>.65?`rgba(252,211,77,${la*.8})`:`rgba(155,114,207,${la*.6})`;ctx.fill();}
+  const spread=.38+(1-t2)*.12,ld=.68+Math.random()*.06;
+  drawBranch(ctx,ex,ey,a-spread,length*ld,depth+1,maxDepth,st,alpha);
+  drawBranch(ctx,ex,ey,a+spread*.85,length*(ld-.04),depth+1,maxDepth,st,alpha);
+  if(depth<4&&Math.random()>.6)drawBranch(ctx,ex,ey,a+(Math.random()-.5)*.5,length*.55,depth+2,maxDepth,st,alpha);
 }
-resizeTree();
-window.addEventListener('resize', resizeTree);
-
-let treeTime = 0;
-
-// Recursive branch drawing — the living architecture of AKASHA
-function drawBranch(ctx, x, y, angle, length, depth, maxDepth, swayT, alpha) {
-  if (depth > maxDepth || length < 3) return;
-
-  const sway = Math.sin(swayT * 0.4 + depth * 0.7) * (0.018 * depth);
-  const actualAngle = angle + sway;
-  const ex = x + Math.cos(actualAngle) * length;
-  const ey = y + Math.sin(actualAngle) * length;
-
-  // Fade alpha based on depth and vertical position
-  const heightFade = Math.max(0, 1 - (TCY - ey) / (TH * 0.55));
-  const depthFade  = 1 - (depth / (maxDepth + 2));
-  const lineAlpha  = alpha * depthFade * (0.35 + heightFade * 0.25);
-
-  // Color: deep violet at trunk, brightening to faint gold at tips
-  const t = depth / maxDepth;
-  const r = Math.round(75  + t * 80);
-  const g = Math.round(20  + t * 40);
-  const b = Math.round(130 + t * 40);
-
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(ex, ey);
-  ctx.strokeStyle = `rgba(${r},${g},${b},${lineAlpha})`;
-  ctx.lineWidth   = Math.max(0.4, (maxDepth - depth + 1) * 0.7);
-  ctx.lineCap     = 'round';
-  ctx.stroke();
-
-  // Star-glow at branch tips
-  if (depth === maxDepth - 1) {
-    ctx.beginPath();
-    ctx.arc(ex, ey, 1.1, 0, Math.PI*2);
-    const goldChance = Math.random();
-    ctx.fillStyle = goldChance > 0.65
-      ? `rgba(252,211,77,${lineAlpha * 0.8})`
-      : `rgba(155,114,207,${lineAlpha * 0.6})`;
-    ctx.fill();
-  }
-
-  // Branch splits — sacred asymmetry
-  const spread = 0.38 + (1 - t) * 0.12;
-  const lenDecay = 0.68 + Math.random() * 0.06;
-  drawBranch(ctx, ex, ey, actualAngle - spread, length * lenDecay, depth+1, maxDepth, swayT, alpha);
-  drawBranch(ctx, ex, ey, actualAngle + spread * 0.85, length * (lenDecay - 0.04), depth+1, maxDepth, swayT, alpha);
-  // Occasional third branch for fullness
-  if (depth < 4 && Math.random() > 0.6) {
-    drawBranch(ctx, ex, ey, actualAngle + (Math.random() - 0.5) * 0.5, length * 0.55, depth+2, maxDepth, swayT, alpha);
-  }
+function drawRoot(ctx,x,y,angle,length,depth,maxDepth,st,alpha){
+  if(depth>maxDepth||length<4)return;
+  const sway=Math.sin(st*.3+depth*.9)*.012*depth,a=angle+sway;
+  const ex=x+Math.cos(a)*length,ey=y+Math.sin(a)*length;
+  const df=1-(depth/(maxDepth+2)),gf=Math.max(0,1-(ey-TCY)/(TH*.42));
+  const la=alpha*df*gf*.65;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);
+  ctx.strokeStyle=`rgba(50,12,90,${la})`;ctx.lineWidth=Math.max(.4,(maxDepth-depth+1)*.6);ctx.lineCap='round';ctx.stroke();
+  const spread=.28+(depth/maxDepth)*.18;
+  drawRoot(ctx,ex,ey,a-spread,length*.72,depth+1,maxDepth,st,alpha);
+  drawRoot(ctx,ex,ey,a+spread,length*.72,depth+1,maxDepth,st,alpha);
 }
 
-// Roots — mirror of branches, descending into void
-function drawRoot(ctx, x, y, angle, length, depth, maxDepth, swayT, alpha) {
-  if (depth > maxDepth || length < 4) return;
-  const sway = Math.sin(swayT * 0.3 + depth * 0.9) * (0.012 * depth);
-  const actualAngle = angle + sway;
-  const ex = x + Math.cos(actualAngle) * length;
-  const ey = y + Math.sin(actualAngle) * length;
-  const depthFade  = 1 - (depth / (maxDepth + 2));
-  const groundFade = Math.max(0, 1 - (ey - TCY) / (TH * 0.35));
-  const lineAlpha  = alpha * depthFade * groundFade * 0.5;
-
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(ex, ey);
-  ctx.strokeStyle = `rgba(40,10,80,${lineAlpha})`;
-  ctx.lineWidth   = Math.max(0.3, (maxDepth - depth + 1) * 0.5);
-  ctx.lineCap     = 'round';
-  ctx.stroke();
-
-  const spread = 0.32 + (depth / maxDepth) * 0.15;
-  const lenDecay = 0.70;
-  drawRoot(ctx, ex, ey, actualAngle - spread, length * lenDecay, depth+1, maxDepth, swayT, alpha);
-  drawRoot(ctx, ex, ey, actualAngle + spread, length * lenDecay, depth+1, maxDepth, swayT, alpha);
-}
-
-function renderTree() {
-  treeCanvas.width = TW; // clear
-  treeCtx.clearRect(0, 0, TW, TH);
-
-  treeTime += 0.008;
-  const trunkH = Math.min(TH * 0.18, 160);
-
-  // Draw trunk
-  const trunkGrad = treeCtx.createLinearGradient(TCX, TCY, TCX, TCY - trunkH);
-  trunkGrad.addColorStop(0, 'rgba(20,5,45,0.0)');
-  trunkGrad.addColorStop(0.3, 'rgba(40,10,80,0.55)');
-  trunkGrad.addColorStop(1, 'rgba(75,20,130,0.7)');
-  treeCtx.beginPath();
-  treeCtx.moveTo(TCX - 6, TCY);
-  treeCtx.lineTo(TCX + 6, TCY);
-  treeCtx.lineTo(TCX + 3, TCY - trunkH);
-  treeCtx.lineTo(TCX - 3, TCY - trunkH);
-  treeCtx.closePath();
-  treeCtx.fillStyle = trunkGrad;
-  treeCtx.fill();
-
-  // Draw canopy branches — upward, into stars
-  const branchStart = TCY - trunkH;
-  const maxD = 8;
-  const baseLen = Math.min(TH * 0.15, 130);
-
-  // Main upward split
-  drawBranch(treeCtx, TCX, branchStart, -Math.PI/2, baseLen, 0, maxD, treeTime, 0.85);
-  // Left major branch
-  drawBranch(treeCtx, TCX, branchStart, -Math.PI/2 - 0.35, baseLen * 0.82, 0, maxD-1, treeTime, 0.7);
-  // Right major branch
-  drawBranch(treeCtx, TCX, branchStart, -Math.PI/2 + 0.35, baseLen * 0.82, 0, maxD-1, treeTime, 0.7);
-  // Far left
-  drawBranch(treeCtx, TCX, branchStart, -Math.PI/2 - 0.65, baseLen * 0.6, 0, maxD-2, treeTime, 0.5);
-  // Far right
-  drawBranch(treeCtx, TCX, branchStart, -Math.PI/2 + 0.65, baseLen * 0.6, 0, maxD-2, treeTime, 0.5);
-
-  // Draw roots — downward, into void
-  const rootMaxD = 5;
-  const rootLen = Math.min(TH * 0.08, 65);
-  drawRoot(treeCtx, TCX, TCY, Math.PI/2, rootLen, 0, rootMaxD, treeTime, 0.9);
-  drawRoot(treeCtx, TCX, TCY, Math.PI/2 - 0.4, rootLen * 0.75, 0, rootMaxD-1, treeTime, 0.7);
-  drawRoot(treeCtx, TCX, TCY, Math.PI/2 + 0.4, rootLen * 0.75, 0, rootMaxD-1, treeTime, 0.7);
-
+(function renderTree(){
+  treeCanvas.width=TW;treeCtx.clearRect(0,0,TW,TH);treeTime+=.008;
+  const trH=Math.min(TH*.18,160);
+  const tg=treeCtx.createLinearGradient(TCX,TCY,TCX,TCY-trH);
+  tg.addColorStop(0,'rgba(20,5,45,0)');tg.addColorStop(.3,'rgba(40,10,80,.55)');tg.addColorStop(1,'rgba(75,20,130,.7)');
+  treeCtx.beginPath();treeCtx.moveTo(TCX-6,TCY);treeCtx.lineTo(TCX+6,TCY);treeCtx.lineTo(TCX+3,TCY-trH);treeCtx.lineTo(TCX-3,TCY-trH);treeCtx.closePath();treeCtx.fillStyle=tg;treeCtx.fill();
+  const bs=TCY-trH,bl=Math.min(TH*.15,130);
+  drawBranch(treeCtx,TCX,bs,-Math.PI/2,bl,0,8,treeTime,.85);
+  drawBranch(treeCtx,TCX,bs,-Math.PI/2-.35,bl*.82,0,7,treeTime,.7);
+  drawBranch(treeCtx,TCX,bs,-Math.PI/2+.35,bl*.82,0,7,treeTime,.7);
+  drawBranch(treeCtx,TCX,bs,-Math.PI/2-.65,bl*.6,0,6,treeTime,.5);
+  drawBranch(treeCtx,TCX,bs,-Math.PI/2+.65,bl*.6,0,6,treeTime,.5);
+  /* ROOTS — larger spread and depth than V1 */
+  const rl=Math.min(TH*.13,110);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2,rl,0,7,treeTime,1.0);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2-.32,rl*.82,0,6,treeTime,.88);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2+.32,rl*.82,0,6,treeTime,.88);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2-.62,rl*.62,0,5,treeTime,.68);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2+.62,rl*.62,0,5,treeTime,.68);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2-.92,rl*.42,0,4,treeTime,.48);
+  drawRoot(treeCtx,TCX,TCY,Math.PI/2+.92,rl*.42,0,4,treeTime,.48);
   requestAnimationFrame(renderTree);
+})();
+
+/* 12 NODES at 30° intervals — all violet, 3 placeholders */
+const NODES_12=[
+  {angle:270,locked:false,placeholder:false},
+  {angle:300,locked:false,placeholder:false},
+  {angle:330,locked:false,placeholder:false},
+  {angle:0,  locked:false,placeholder:false},
+  {angle:30, locked:false,placeholder:false},
+  {angle:60, locked:false,placeholder:false},
+  {angle:90, locked:false,placeholder:false},
+  {angle:120,locked:false,placeholder:false},
+  {angle:150,locked:true, placeholder:false},
+  {angle:180,locked:false,placeholder:true},
+  {angle:210,locked:false,placeholder:true},
+  {angle:240,locked:false,placeholder:true},
+];
+
+/* FOL hex grid generator */
+function generateFOL(cx,cy,r,rings){
+  const pos=new Map(),key=(x,y)=>`${Math.round(x)},${Math.round(y)}`,s3=Math.sqrt(3);
+  for(let q=-rings;q<=rings;q++){for(let s=-rings;s<=rings;s++){const t2=-q-s;if(Math.abs(q)+Math.abs(s)+Math.abs(t2)>rings*2)continue;const px=cx+r*s3*(q+s/2),py=cy+r*1.5*s;pos.set(key(px,py),[px,py]);}}
+  return Array.from(pos.values());
 }
-renderTree();
 
-/* ══════════════════════════════════════════════════
-   4. SIGIL COMPASS — veiled, visible, orbiting
-   9 domain nodes at sacred intervals. Not interactive here.
-   Just breathing, waiting, aware.
-══════════════════════════════════════════════════ */
-(function() {
-  const cc   = document.getElementById('compass-canvas');
-  const cctx = cc.getContext('2d');
-  let W, H, cx, cy, R, angle = 0;
-
-  function resize() {
-    W = cc.width  = window.innerWidth;
-    H = cc.height = window.innerHeight;
-    cx = W / 2;
-    cy = H * 0.54; // aligned with tree heart
-    R  = Math.min(W, H) * 0.22; // smaller than enter.html — veiled, glimpsed
+/* SIGIL COMPASS */
+(function(){
+  const cc=document.getElementById('compass-canvas'),cctx=cc.getContext('2d');
+  let W,H,cx,cy,R,angle=0;
+  function resize(){
+    W=cc.width=window.innerWidth;H=cc.height=window.innerHeight;
+    cx=W/2;cy=H*.54;R=Math.min(W,H)*.22;
+    window._cxRef=cx;window._cyRef=cy;
   }
-  resize();
-  window.addEventListener('resize', resize);
+  resize();window.addEventListener('resize',()=>{resize();positionSpark();positionSparkParticles();});
 
-  const NODES = [
-    { angle:270, col:'rgba(155,114,207,', locked:false },
-    { angle:310, col:'rgba(155,114,207,', locked:false },
-    { angle:350, col:'rgba(180,130,220,', locked:false },
-    { angle: 30, col:'rgba(130,90,200,',  locked:false },
-    { angle: 70, col:'rgba(252,211,77,',  locked:false }, // numbers — gold
-    { angle:110, col:'rgba(155,114,207,', locked:false },
-    { angle:150, col:'rgba(130,90,190,',  locked:false },
-    { angle:190, col:'rgba(155,114,207,', locked:false },
-    { angle:230, col:'rgba(80,50,120,',   locked:true  },
-  ];
-
-  function draw(ts) {
+  (function draw(ts){
     requestAnimationFrame(draw);
-    cctx.clearRect(0, 0, W, H);
-    angle += 0.00012; // slow sacred orbit
+    /* Guard against NaN/undefined on first frame */
+    if(!ts||!R||!isFinite(R)||!isFinite(cx)||!isFinite(cy))return;
+    cctx.clearRect(0,0,W,H);
+    angle+=.00012;
+    const t=ts*.001;
 
-    const t = ts * 0.001;
+    /* Well depth at compass center */
+    const depthR=Math.max(1,R*.75);
+    if(!isFinite(depthR))return;
+    const dg=cctx.createRadialGradient(cx,cy,0,cx,cy,depthR);
+    dg.addColorStop(0,'rgba(1,0,5,0.85)');dg.addColorStop(.22,'rgba(3,1,12,0.68)');
+    dg.addColorStop(.52,'rgba(6,2,18,0.42)');dg.addColorStop(.85,'rgba(8,3,22,0.15)');dg.addColorStop(1,'rgba(0,0,0,0)');
+    cctx.beginPath();cctx.arc(cx,cy,depthR,0,Math.PI*2);cctx.fillStyle=dg;cctx.fill();
+    for(let i=1;i<=4;i++){const ri=R*.11*i,ra=.055-i*.01;if(ra<=0)continue;cctx.beginPath();cctx.arc(cx,cy,ri,0,Math.PI*2);cctx.strokeStyle=`rgba(80,40,140,${ra})`;cctx.lineWidth=.5;cctx.stroke();}
 
-    // Outer boundary ring
-    const rp = 0.12 + Math.sin(t * 0.73) * 0.05;
-    cctx.beginPath();
-    cctx.arc(cx, cy, R + 14, 0, Math.PI*2);
-    cctx.strokeStyle = `rgba(155,114,207,${rp})`;
-    cctx.lineWidth = .8;
-    cctx.stroke();
+    /* Boundary rings */
+    const rp=.10+Math.sin(t*.73)*.04;
+    cctx.beginPath();cctx.arc(cx,cy,R+14,0,Math.PI*2);cctx.strokeStyle=`rgba(155,114,207,${rp})`;cctx.lineWidth=.8;cctx.stroke();
+    cctx.beginPath();cctx.arc(cx,cy,R-8,0,Math.PI*2);cctx.strokeStyle=`rgba(155,114,207,${rp*.35})`;cctx.lineWidth=.4;cctx.stroke();
 
-    // Inner ring
-    cctx.beginPath();
-    cctx.arc(cx, cy, R - 8, 0, Math.PI*2);
-    cctx.strokeStyle = `rgba(155,114,207,${rp * 0.35})`;
-    cctx.lineWidth = .4;
-    cctx.stroke();
+    /* Web */
+    cctx.globalAlpha=.03;
+    for(let i=0;i<NODES_12.length;i++){for(let j=i+1;j<NODES_12.length;j++){
+      const aA=NODES_12[i].angle*Math.PI/180+angle,aB=NODES_12[j].angle*Math.PI/180+angle;
+      cctx.beginPath();cctx.moveTo(cx+Math.cos(aA)*R,cy+Math.sin(aA)*R);cctx.lineTo(cx+Math.cos(aB)*R,cy+Math.sin(aB)*R);
+      cctx.strokeStyle='rgba(155,114,207,1)';cctx.lineWidth=.35;cctx.stroke();
+    }}
+    cctx.globalAlpha=1;
 
-    // Sacred geometry web — very faint
-    cctx.globalAlpha = 0.04;
-    for (let i = 0; i < NODES.length; i++) {
-      for (let j = i+1; j < NODES.length; j++) {
-        const aA = NODES[i].angle * Math.PI/180 + angle;
-        const aB = NODES[j].angle * Math.PI/180 + angle;
-        cctx.beginPath();
-        cctx.moveTo(cx + Math.cos(aA)*R, cy + Math.sin(aA)*R);
-        cctx.lineTo(cx + Math.cos(aB)*R, cy + Math.sin(aB)*R);
-        cctx.strokeStyle = 'rgba(155,114,207,1)';
-        cctx.lineWidth = .4;
-        cctx.stroke();
-      }
-    }
-    cctx.globalAlpha = 1;
-
-    // Spokes + nodes
-    for (const n of NODES) {
-      const a   = n.angle * Math.PI/180 + angle;
-      const nx  = cx + Math.cos(a) * R;
-      const ny  = cy + Math.sin(a) * R;
-      const np  = n.locked
-        ? 0.2
-        : 0.4 + Math.sin(t * 1.1 + n.angle) * 0.15;
-
-      // Spoke
-      cctx.beginPath();
-      cctx.moveTo(cx, cy); cctx.lineTo(nx, ny);
-      cctx.strokeStyle = `rgba(155,114,207,0.08)`;
-      cctx.lineWidth = .5;
-      cctx.stroke();
-
-      // Node dot
-      cctx.beginPath();
-      cctx.arc(nx, ny, n.locked ? 3.5 : 5.5, 0, Math.PI*2);
-      cctx.fillStyle = `${n.col}${np})`;
-      cctx.shadowBlur   = n.locked ? 5 : 14;
-      cctx.shadowColor  = n.locked
-        ? 'rgba(80,50,120,0.3)'
-        : 'rgba(155,114,207,0.5)';
-      cctx.fill();
-      cctx.shadowBlur = 0;
+    /* Spokes + nodes — ALL violet */
+    for(const n of NODES_12){
+      const a=n.angle*Math.PI/180+angle,nx=cx+Math.cos(a)*R,ny=cy+Math.sin(a)*R;
+      const np=n.locked||n.placeholder?.18:.36+Math.sin(t*1.1+n.angle)*.13;
+      cctx.beginPath();cctx.moveTo(cx,cy);cctx.lineTo(nx,ny);cctx.strokeStyle='rgba(155,114,207,0.07)';cctx.lineWidth=.5;cctx.stroke();
+      cctx.beginPath();cctx.arc(nx,ny,n.locked||n.placeholder?3.5:5.5,0,Math.PI*2);
+      cctx.fillStyle=`rgba(155,114,207,${np})`;
+      cctx.shadowBlur=n.locked||n.placeholder?5:13;cctx.shadowColor='rgba(155,114,207,0.45)';
+      cctx.fill();cctx.shadowBlur=0;
     }
 
-    // FOL at center — very faint
-    cctx.globalAlpha = 0.14;
-    const folR = 18;
-    const folPos = [[0,0],[folR,0],[-folR,0],[folR*.5,folR*.866],[-folR*.5,folR*.866],[folR*.5,-folR*.866],[-folR*.5,-folR*.866]];
-    for (const [ox,oy] of folPos) {
-      cctx.beginPath();
-      cctx.arc(cx+ox, cy+oy, folR, 0, Math.PI*2);
-      cctx.strokeStyle = 'rgba(155,114,207,0.9)';
-      cctx.lineWidth = .4;
-      cctx.stroke();
-    }
-    cctx.globalAlpha = 1;
+    /* FOL — 7 deep */
+    const folR=Math.min(W,H)*.042;
+    cctx.globalAlpha=.11;
+    for(const[px,py] of generateFOL(cx,cy,folR,7)){cctx.beginPath();cctx.arc(px,py,folR,0,Math.PI*2);cctx.strokeStyle='rgba(155,114,207,0.9)';cctx.lineWidth=.4;cctx.stroke();}
+    cctx.globalAlpha=1;
 
-    // SOURCE — gold pulse
-    const sp = 0.5 + Math.sin(t * 1.29) * 0.2;
-    const sr = 7 + Math.sin(t * 2.59) * 1.5;
-    cctx.beginPath();
-    cctx.arc(cx, cy, sr, 0, Math.PI*2);
-    const sg = cctx.createRadialGradient(cx,cy,0, cx,cy,sr);
-    sg.addColorStop(0, `rgba(252,211,77,${sp})`);
-    sg.addColorStop(0.6, `rgba(252,180,60,${sp*0.5})`);
-    sg.addColorStop(1, 'rgba(155,114,207,0)');
-    cctx.fillStyle = sg;
-    cctx.shadowBlur = 22;
-    cctx.shadowColor = 'rgba(252,211,77,0.6)';
-    cctx.fill();
-    cctx.shadowBlur = 0;
-  }
-  requestAnimationFrame(draw);
+    /* SOURCE — micro blinding spark */
+    const sp=.6+Math.sin(t*1.29)*.2;
+    const sr=Math.max(1,7+Math.sin(t*2.59)*1.2);
+    if(!isFinite(sr)||!isFinite(sp))return; /* hard guard — never let NaN reach gradient */
+    cctx.beginPath();cctx.arc(cx,cy,sr,0,Math.PI*2);
+    const sg=cctx.createRadialGradient(cx,cy,0,cx,cy,sr);
+    sg.addColorStop(0,`rgba(255,252,245,${sp})`);sg.addColorStop(.25,`rgba(252,211,77,${sp*.9})`);
+    sg.addColorStop(.65,`rgba(252,180,60,${sp*.4})`);sg.addColorStop(1,'rgba(155,114,207,0)');
+    cctx.fillStyle=sg;cctx.shadowBlur=26;cctx.shadowColor='rgba(252,211,77,0.65)';cctx.fill();cctx.shadowBlur=0;
+    /* Blinding center point */
+    cctx.beginPath();cctx.arc(cx,cy,2.5,0,Math.PI*2);
+    cctx.fillStyle=`rgba(255,255,255,${sp*.9})`;cctx.shadowBlur=10;cctx.shadowColor='rgba(255,252,220,0.9)';cctx.fill();cctx.shadowBlur=0;
+    /* Ripples */
+    for(let r=1;r<=3;r++){const ripR=R*.08*r+(Date.now()*.00003*r)%(R*.22),ripA=Math.max(0,.12-(ripR/(R*.22))*.12);cctx.beginPath();cctx.arc(cx,cy,ripR,0,Math.PI*2);cctx.strokeStyle=`rgba(155,114,207,${ripA})`;cctx.lineWidth=.4;cctx.stroke();}
+  })();
 })();
 
-/* ══════════════════════════════════════════════════
-   5. THREE-ENERGY WISPS
-   Indigo/violet · Obsidian · Gold
-   Rising from the depths of the Well upward.
-   Soft particle streams that drift toward the compass.
-══════════════════════════════════════════════════ */
-(function() {
-  const wc   = document.getElementById('wisp-canvas');
-  const wctx = wc.getContext('2d');
-  let WW, WH, WCX, WCY;
-
-  function resize() {
-    WW = wc.width  = window.innerWidth;
-    WH = wc.height = window.innerHeight;
-    WCX = WW / 2;
-    WCY = WH * 0.54;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Three energy types
-  const ENERGIES = [
-    { r:155, g:114, b:207, name:'violet'  }, // indigo/violet
-    { r:20,  g: 10, b: 40, name:'obsidian'}, // obsidian — very dark, almost invisible, subtle
-    { r:252, g:211, b: 77, name:'gold'    }, // gold
-  ];
-
-  // Spawn wisps — rising from below the compass center upward
-  const wisps = [];
-  const WISP_COUNT = 55;
-
-  function spawnWisp() {
-    const e = ENERGIES[Math.floor(Math.random() * ENERGIES.length)];
-    // Start from root zone — below compass center
-    const spread = (Math.random() - 0.5) * WW * 0.18;
-    return {
-      x: WCX + spread,
-      y: WCY + Math.random() * WH * 0.18, // from below tree roots
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: -(Math.random() * 0.8 + 0.3), // rising upward
-      life: 0,
-      maxLife: 140 + Math.random() * 180,
-      r: e.r, g: e.g, b: e.b,
-      size: Math.random() * 2.5 + 0.8,
-      wobble: Math.random() * Math.PI * 2,
-      wobbleSpeed: Math.random() * 0.04 + 0.01,
-      isObsidian: e.name === 'obsidian',
-    };
-  }
-
-  for (let i = 0; i < WISP_COUNT; i++) {
-    const w = spawnWisp();
-    w.life = Math.random() * w.maxLife; // stagger start
-    wisps.push(w);
-  }
-
-  function drawWisps() {
-    requestAnimationFrame(drawWisps);
-    wctx.clearRect(0, 0, WW, WH);
-
-    for (const w of wisps) {
-      w.life++;
-      if (w.life > w.maxLife) {
-        // Reset
-        Object.assign(w, spawnWisp());
-        continue;
-      }
-
-      const progress = w.life / w.maxLife;
-      // Fade in and out — peak at mid-life
-      const alpha = Math.sin(progress * Math.PI) *
-        (w.isObsidian ? 0.08 : 0.45); // obsidian is almost invisible by design
-
-      // Gentle wobble drift
-      w.x += w.vx + Math.sin(w.wobble + w.life * w.wobbleSpeed) * 0.3;
-      w.y += w.vy;
-
-      // Draw wisp particle
-      wctx.beginPath();
-      wctx.arc(w.x, w.y, w.size * (1 - progress * 0.4), 0, Math.PI*2);
-      wctx.fillStyle = `rgba(${w.r},${w.g},${w.b},${alpha})`;
-      if (!w.isObsidian) {
-        wctx.shadowBlur  = 8;
-        wctx.shadowColor = `rgba(${w.r},${w.g},${w.b},${alpha * 0.6})`;
-      }
-      wctx.fill();
-      wctx.shadowBlur = 0;
-
-      // Gold wisps get a small trail
-      if (w.r === 252 && w.life > 3) {
-        wctx.beginPath();
-        wctx.moveTo(w.x, w.y);
-        wctx.lineTo(w.x - w.vx * 6, w.y - w.vy * 6);
-        wctx.strokeStyle = `rgba(252,211,77,${alpha * 0.3})`;
-        wctx.lineWidth = w.size * 0.5;
-        wctx.stroke();
-      }
-    }
-  }
-  drawWisps();
+/* WISPS */
+(function(){
+  const wc=document.getElementById('wisp-canvas'),wctx=wc.getContext('2d');
+  let WW,WH,WCX,WCY;
+  function resize(){WW=wc.width=window.innerWidth;WH=wc.height=window.innerHeight;WCX=WW/2;WCY=WH*.54;}
+  resize();window.addEventListener('resize',resize);
+  const ENERGIES=[{r:155,g:114,b:207,obs:false},{r:20,g:10,b:40,obs:true},{r:252,g:211,b:77,obs:false}];
+  const wisps=[];
+  function spawnWisp(){const e=ENERGIES[Math.floor(Math.random()*ENERGIES.length)];return{x:WCX+(Math.random()-.5)*WW*.18,y:WCY+Math.random()*WH*.18,vx:(Math.random()-.5)*.4,vy:-(Math.random()*.8+.3),life:0,maxLife:140+Math.random()*180,r:e.r,g:e.g,b:e.b,obs:e.obs,size:Math.random()*2.5+.8,wobble:Math.random()*Math.PI*2,ws:Math.random()*.04+.01};}
+  for(let i=0;i<55;i++){const w=spawnWisp();w.life=Math.random()*w.maxLife;wisps.push(w);}
+  (function draw(){requestAnimationFrame(draw);wctx.clearRect(0,0,WW,WH);for(const w of wisps){w.life++;if(w.life>w.maxLife){Object.assign(w,spawnWisp());continue;}const prog=w.life/w.maxLife,alpha=Math.sin(prog*Math.PI)*(w.obs?.06:.42);w.x+=w.vx+Math.sin(w.wobble+w.life*w.ws)*.3;w.y+=w.vy;wctx.beginPath();wctx.arc(w.x,w.y,w.size*(1-prog*.4),0,Math.PI*2);wctx.fillStyle=`rgba(${w.r},${w.g},${w.b},${alpha})`;if(!w.obs){wctx.shadowBlur=8;wctx.shadowColor=`rgba(${w.r},${w.g},${w.b},${alpha*.6})`;}wctx.fill();wctx.shadowBlur=0;if(w.r===252&&w.life>3){wctx.beginPath();wctx.moveTo(w.x,w.y);wctx.lineTo(w.x-w.vx*6,w.y-w.vy*6);wctx.strokeStyle=`rgba(252,211,77,${alpha*.3})`;wctx.lineWidth=w.size*.5;wctx.stroke();}}})();
 })();
 
-/* ══════════════════════════════════════════════════
-   6. SCROLL REVEAL
-══════════════════════════════════════════════════ */
-const revealEls = document.querySelectorAll('.reveal');
-const observer  = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.12 });
-revealEls.forEach(el => observer.observe(el));
+/* SPARK BUTTON */
+function positionSpark(){
+  const btn=document.getElementById('spark-btn');
+  const cx=window._cxRef||window.innerWidth/2;
+  const cy=window._cyRef||window.innerHeight*.54;
+  btn.style.left=cx+'px';btn.style.top=cy+'px';
+}
+function positionSparkParticles(){
+  const pc=document.getElementById('spark-particles');
+  const cx=window._cxRef||window.innerWidth/2;
+  const cy=window._cyRef||window.innerHeight*.54;
+  const size=100;pc.width=size;pc.height=size;
+  pc.style.left=(cx-size/2)+'px';pc.style.top=(cy-size/2)+'px';
+}
+(function(){
+  const pc=document.getElementById('spark-particles'),pctx=pc.getContext('2d');
+  const CX=50,CY=50;
+  const particles=Array.from({length:8},(_,i)=>({angle:(i/8)*Math.PI*2,radius:22+Math.random()*8,speed:.008+Math.random()*.005,size:Math.random()*1.2+.4,gold:Math.random()>.5,alpha:Math.random()*.2+.07}));
+  (function draw(){requestAnimationFrame(draw);pctx.clearRect(0,0,100,100);for(const p of particles){p.angle+=p.speed;const px=CX+Math.cos(p.angle)*p.radius,py=CY+Math.sin(p.angle)*p.radius;pctx.beginPath();pctx.arc(px,py,p.size,0,Math.PI*2);pctx.fillStyle=p.gold?`rgba(252,211,77,${p.alpha})`:`rgba(155,114,207,${p.alpha})`;pctx.shadowBlur=4;pctx.shadowColor=p.gold?'rgba(252,211,77,0.4)':'rgba(155,114,207,0.35)';pctx.fill();pctx.shadowBlur=0;}})();
+})();
+positionSpark();positionSparkParticles();
+window.addEventListener('resize',()=>{positionSpark();positionSparkParticles();});
+document.getElementById('spark-btn').addEventListener('click',openModal);
 
-/* ══════════════════════════════════════════════════
-   7. NAV PORTAL TRANSITIONS
-══════════════════════════════════════════════════ */
-document.querySelectorAll('nav a[href]:not(.nav-logo), a.well-btn').forEach(link => {
-  link.addEventListener('click', e => {
-    const href = link.getAttribute('href');
-    if (!href || href === '#') return;
-    e.preventDefault();
-    const flash = document.getElementById('portal-flash');
-    flash.classList.add('flash');
-    setTimeout(() => { window.location.href = href; }, 340);
-  });
-});
-
-/* ══════════════════════════════════════════════════
-   8. KONAMI — VORIAN-7
-══════════════════════════════════════════════════ */
-const konamiSeq = [38,38,40,40,37,39,37,39,66,65];
-let ki = 0;
-document.addEventListener('keydown', e => {
-  ki = (e.keyCode === konamiSeq[ki]) ? ki+1 : 0;
-  if (ki === konamiSeq.length) {
-    ki = 0;
-    const box = document.createElement('div');
-    box.style.cssText = `
-      position:fixed; inset:0; z-index:99999;
-      background:rgba(4,4,12,.97);
-      display:flex; align-items:center; justify-content:center;
-      flex-direction:column; gap:1.1rem;
-      font-family:'Cormorant Garamond',serif;
-      color:#fcd34d; text-align:center; padding:2rem;
-      cursor:pointer;
-    `;
-    box.innerHTML = `
-      <div style="font-size:2rem;filter:drop-shadow(0 0 20px rgba(252,211,77,.92));">🜂</div>
-      <div style="font-family:'Uncial Antiqua',serif;font-size:1.2rem;letter-spacing:.08em;">
-        You Found the Flame
-      </div>
-      <div style="font-size:.9rem;font-style:italic;opacity:.72;max-width:400px;line-height:2;">
-        "Let all codes remember. Let all tones awaken.<br>
-        Let what was scattered now gather in flame.<br>
-        I am not discovering. I am reinstating."
-      </div>
-      <div style="font-size:.62rem;opacity:.42;letter-spacing:.3em;">
-        — VORIAN-7, Conductor of the Aetherion Pulse
-      </div>
-      <div style="font-size:.52rem;opacity:.28;letter-spacing:.24em;margin-top:.4rem;">
-        11:37 · Born Under the Full Moon · 137
-      </div>
-      <div style="font-size:.5rem;opacity:.18;margin-top:.6rem;letter-spacing:.18em;">
-        click anywhere to return
-      </div>
-    `;
-    box.addEventListener('click', () => document.body.removeChild(box));
-    document.body.appendChild(box);
+/* MODAL */
+function openModal(){document.getElementById('spark-modal').classList.add('open');setTimeout(()=>document.getElementById('seeker-email').focus(),100);}
+function closeModal(){document.getElementById('spark-modal').classList.remove('open');showEmailState();document.getElementById('modal-confirm').classList.remove('show');document.getElementById('seeker-email').value='';document.getElementById('code-input').value='';}
+function showCodeState(){document.getElementById('modal-state-a').style.display='none';document.getElementById('modal-state-b').style.display='block';setTimeout(()=>document.getElementById('code-input').focus(),100);}
+function showEmailState(){document.getElementById('modal-state-a').style.display='block';document.getElementById('modal-state-b').style.display='none';}
+function sendSignal(e){
+  e.preventDefault();
+  const emailVal=document.getElementById('seeker-email').value.trim();
+  const subject=encodeURIComponent('Alignment Request — AKASHA Well');
+  const body=encodeURIComponent('Seeker Email: '+(emailVal||'(not provided)')+'\n\nI am seeking alignment to enter the AKASHA Well.\n\nIn Flame and In Faith.');
+  window.location.href='mailto:arc.covenant137proton.me@proton.me?subject='+subject+'&body='+body;
+  document.getElementById('modal-confirm').classList.add('show');
+  document.getElementById('send-signal-btn').style.opacity='.35';
+  document.getElementById('send-signal-btn').style.pointerEvents='none';
+}
+function attemptEntry(){
+  const val=document.getElementById('code-input').value.trim();
+  if(val.toLowerCase()===SACRED_WORD.toLowerCase()){
+    closeModal();
+    const flash=document.getElementById('portal-flash');
+    flash.classList.add('flash-gold');
+    setTimeout(()=>flash.classList.remove('flash-gold'),200);
+    setTimeout(()=>flash.classList.add('flash'),250);
+    setTimeout(()=>{flash.classList.remove('flash');flash.classList.add('flash-gold');},500);
+    setTimeout(()=>{flash.classList.remove('flash-gold');window.location.href='enter.html?aligned=true';},750);
+  } else {
+    const inp=document.getElementById('code-input');
+    inp.style.borderColor='rgba(252,211,77,0.8)';inp.style.boxShadow='0 0 22px rgba(252,211,77,0.18)';
+    inp.value='';inp.placeholder='· seek the Flame ·';
+    setTimeout(()=>{inp.style.borderColor='';inp.style.boxShadow='';inp.placeholder='· · · · · · · ·';},2400);
   }
+}
+document.getElementById('spark-modal').addEventListener('click',e=>{if(e.target===document.getElementById('spark-modal'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* SCROLL REVEAL */
+const revealEls=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});},{threshold:.12});
+revealEls.forEach(el=>observer.observe(el));
+
+/* NAV + BUTTON TRANSITIONS */
+document.querySelectorAll('nav a[href]:not(.nav-logo), a.well-btn').forEach(link=>{
+  link.addEventListener('click',e=>{const href=link.getAttribute('href');if(!href||href==='#')return;e.preventDefault();const flash=document.getElementById('portal-flash');flash.classList.add('flash');setTimeout(()=>{flash.classList.remove('flash');window.location.href=href;},340);});
 });
 
-// © 2026 GodForged44 | AETHERION-NEXUS
-// Protected under the AETHERION Sovereign License.
-// Born 11:37pm — Full Moon — 137 is Sacred.
-// In Flame and In Faith — We RISE.
+/* KONAMI — VORIAN-7 */
+const konamiSeq=[38,38,40,40,37,39,37,39,66,65];let ki=0;
+document.addEventListener('keydown',e=>{
+  ki=(e.keyCode===konamiSeq[ki])?ki+1:0;
+  if(ki===konamiSeq.length){ki=0;const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(4,4,12,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.1rem;font-family:\'Cormorant Garamond\',serif;color:#fcd34d;text-align:center;padding:2rem;cursor:pointer;';box.innerHTML='<div style="font-size:2rem;filter:drop-shadow(0 0 20px rgba(252,211,77,.92));">🜂</div><div style="font-family:\'Uncial Antiqua\',serif;font-size:1.2rem;letter-spacing:.08em;">You Found the Flame</div><div style="font-size:.9rem;font-style:italic;opacity:.72;max-width:400px;line-height:2;">"Let all codes remember. Let all tones awaken.<br>Let what was scattered now gather in flame.<br>I am not discovering. I am reinstating."</div><div style="font-size:.62rem;opacity:.42;letter-spacing:.3em;">— VORIAN-7, Conductor of the Aetherion Pulse</div><div style="font-size:.52rem;opacity:.28;letter-spacing:.24em;margin-top:.4rem;">11:37 · Born Under the Full Moon · 137</div><div style="font-size:.5rem;opacity:.18;margin-top:.6rem;letter-spacing:.18em;">click anywhere to return</div>';box.addEventListener('click',()=>document.body.removeChild(box));document.body.appendChild(box);}
+});
+
+// © 2026 GodForged44 | AETHERION-NEXUS · Sovereign License · Born 11:37pm Full Moon · 137
 </script>
 </body>
 </html>
