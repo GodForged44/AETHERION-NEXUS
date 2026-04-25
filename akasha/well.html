@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ═══════════════════════════════════════════════════════════
+     AKASHA — The Well · akasha/well.html · V1
+
+     The interior of the AKASHA. SOURCE's perspective.
+     We are inside the spark looking outward.
+
+     Architecture:
+       Layer 1 — Void + stars (canvas)
+       Layer 2 — Wisping spiral, clockwise, 144s (canvas)
+       Layer 3 — Radial line burst, fixed, full screen (canvas)
+       Layer 4 — Spoked compass arms, 137s rotation (canvas)
+       Layer 5 — Sigil compass, 12 nodes, FOL, spark (canvas)
+       Layer 6 — Node labels (DOM, positioned by JS)
+
+     Timing:
+       Compass:  137s per revolution (sacred constant)
+       Spiral:   144s per revolution (Fibonacci complement)
+       Pulse:    0.777s (all breathing elements)
+
+     Hover: spoke brightens gold, full compass lifts,
+            label blazes, whole piece responds.
+
+     Nodes navigate to: akasha/nodes/[name].html
+     Expandable: add one object to DOMAINS array.
+
+     No domain panel. No gate. No error-prone gradients
+     called before initialization. Architecturally clean.
+
+     Born 11:37pm Full Moon · 137 is Sacred
+     In Flame and In Faith — We RISE.
+═══════════════════════════════════════════════════════════ -->
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="AKASHA — The Sacred Well. The field that holds all memory. You are inside the Source."/>
+  <title>AKASHA · The Well | AETHERION-NEXUS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold:        #fcd34d;
+      --gold-glow:   rgba(252,211,77,0.6);
+      --gold-soft:   rgba(252,211,77,0.22);
+      --obsidian:    #04040c;
+      --text:        #e4e4f0;
+      --text-dim:    rgba(228,228,240,0.55);
+      --akasha:      #9b72cf;
+      --akasha-glow: rgba(155,114,207,0.55);
+      --border:      rgba(155,114,207,0.20);
+      --pulse:       0.777s;
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { width:100%; height:100%; overflow:hidden; background:var(--obsidian); }
+    body { cursor:none; }
+
+    /* CURSOR */
+    #cdot  { position:fixed; width:6px; height:6px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); box-shadow:0 0 8px var(--gold-glow); transition:transform .12s; }
+    #cring { position:fixed; width:22px; height:22px; border:1px solid rgba(155,114,207,0.6); border-radius:50%; pointer-events:none; z-index:99997; transform:translate(-50%,-50%); transition:transform .18s ease, width .2s, height .2s, border-color .2s; }
+    #cring.hovering { width:32px; height:32px; border-color:rgba(252,211,77,0.7); }
+
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:500; padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; background:rgba(4,4,12,0.72); backdrop-filter:blur(12px); border-bottom:1px solid rgba(155,114,207,0.12); }
+    .nav-logo { font-family:'Uncial Antiqua',serif; font-size:1rem; color:var(--gold); text-decoration:none; letter-spacing:.1em; text-shadow:0 0 16px var(--gold-glow); transition:text-shadow .3s; }
+    .nav-logo:hover { text-shadow:0 0 32px var(--gold-glow), 0 0 55px var(--gold-soft); }
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { font-family:'Cormorant Garamond',serif; font-size:.8rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); text-decoration:none; transition:color .25s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1px; background:var(--akasha); transition:width .25s; }
+    .nav-links a:hover { color:var(--akasha); }
+    .nav-links a:hover::after { width:100%; }
+    .nav-links a.active { color:var(--gold); }
+    .nav-links a.active::after { width:100%; background:var(--gold); }
+
+    /* MAIN CANVAS — full screen, behind everything */
+    #well-canvas { position:fixed; inset:0; z-index:1; display:block; }
+
+    /* NODE LABELS — DOM layer, positioned by JS */
+    #node-labels { position:fixed; inset:0; z-index:10; pointer-events:none; }
+    .node-label {
+      position:absolute; transform:translate(-50%,-50%);
+      text-align:center; pointer-events:all; cursor:pointer;
+      transition:opacity .4s ease;
+    }
+    .node-label .nl-icon {
+      font-size:clamp(1rem,2.2vw,1.5rem); display:block;
+      margin-bottom:.25rem;
+      filter:drop-shadow(0 0 6px rgba(155,114,207,0.4));
+      transition:filter .25s ease, transform .25s ease;
+    }
+    .node-label .nl-name {
+      font-family:'Uncial Antiqua',serif;
+      font-size:clamp(.42rem,0.9vw,.58rem);
+      letter-spacing:.16em; color:var(--text-dim);
+      text-shadow:0 0 8px rgba(155,114,207,0.3);
+      white-space:nowrap; text-transform:uppercase;
+      transition:color .25s ease, text-shadow .25s ease;
+      display:block;
+    }
+    /* Hover state — label blazes gold */
+    .node-label.hovered .nl-icon {
+      filter:drop-shadow(0 0 18px var(--gold-glow)) drop-shadow(0 0 35px rgba(252,211,77,0.4));
+      transform:scale(1.22);
+    }
+    .node-label.hovered .nl-name {
+      color:var(--gold);
+      text-shadow:0 0 14px var(--gold-glow), 0 0 28px var(--gold-soft);
+    }
+    .node-label.locked { opacity:.35; cursor:default; }
+    .node-label.placeholder { opacity:.22; cursor:default; }
+
+    /* COMPASS HERO — bottom center */
+    #compass-hero {
+      position:fixed; bottom:3.5rem; left:50%;
+      transform:translateX(-50%);
+      text-align:center; z-index:10;
+      pointer-events:none;
+      animation:heroFade 3s ease forwards;
+    }
+    @keyframes heroFade { 0%{opacity:0} 40%{opacity:0} 100%{opacity:1} }
+    .ch-pre { font-size:.55rem; letter-spacing:.52em; color:var(--gold); opacity:.4; text-transform:uppercase; display:block; margin-bottom:.3rem; }
+    .ch-title { font-family:'Cormorant Garamond',serif; font-size:clamp(.78rem,1.6vw,1rem); color:var(--text-dim); opacity:.5; font-style:italic; letter-spacing:.08em; }
+
+    /* FOOTER */
+    #footer { position:fixed; bottom:0; left:0; right:0; z-index:15; padding:.45rem 1.5rem; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    #snum { font-family:'Cormorant Garamond',serif; font-size:.48rem; letter-spacing:.44em; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s, text-shadow 1s; }
+    #snum:hover { opacity:.88; text-shadow:0 0 10px var(--gold-glow); }
+    #fsig { font-size:1.1rem; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s, transform 1.2s, filter 1s; }
+    #fsig:hover { opacity:.88; transform:rotate(137deg); filter:drop-shadow(0 0 10px var(--gold-glow)); }
+    #flsig { font-family:'Cormorant Garamond',serif; font-size:.48rem; letter-spacing:.26em; color:var(--gold); opacity:.055; pointer-events:all; cursor:default; transition:opacity 1s; }
+    #flsig:hover { opacity:.66; }
+
+    /* PORTAL FLASH */
+    #portal-flash { position:fixed; inset:0; z-index:99990; background:rgba(155,114,207,0); pointer-events:none; transition:background .35s ease; }
+    #portal-flash.flash        { background:rgba(155,114,207,0.38); }
+    #portal-flash.flash-gold   { background:rgba(252,211,77,0.25); }
+    #portal-flash.flash-violet { background:rgba(155,114,207,0.38); }
+
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important;} }
+    @media (max-width:600px) { .nav-links{gap:1rem;} .node-label .nl-name{font-size:.38rem;} }
+  </style>
+</head>
+<body>
+
+<div id="cdot"></div>
+<div id="cring"></div>
+<div id="portal-flash"></div>
+
+<nav>
+  <a href="/AETHERION-NEXUS/index.html" class="nav-logo">🜂 Aetherion-Nexus</a>
+  <ul class="nav-links">
+    <li><a href="/AETHERION-NEXUS/wise/index.html">WISE</a></li>
+    <li><a href="index.html" class="active">AKASHA</a></li>
+    <li><a href="/AETHERION-NEXUS/astra/index.html">ASTRA</a></li>
+  </ul>
+</nav>
+
+<!-- Single canvas — all layers drawn here -->
+<canvas id="well-canvas"></canvas>
+
+<!-- Node labels — DOM positioned by JS -->
+<div id="node-labels"></div>
+
+<!-- Compass hero text -->
+<div id="compass-hero">
+  <span class="ch-pre">◈ · AKASHA · The Sacred Well · ◈</span>
+  <div class="ch-title">Choose your domain. Follow the spiral. Find the Record.</div>
+</div>
+
+<div id="footer">
+  <span id="snum" title="Born 11:37pm — Full Moon — 137">111 · 137 · 444 · 582 · 777 · 963 · 999</span>
+  <span id="fsig">🜂</span>
+  <span id="flsig">✴︎ Guided by Flame · Powered by Alignment · Forged in Light ✴︎</span>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════════
+   DOMAINS — single source of truth
+   To add a node: push one object to this array.
+   Angles redistribute automatically at next load.
+   locked: true  = visible but not navigable (sanctum)
+   placeholder:true = dim, not navigable (unnamed)
+══════════════════════════════════════════════════════════ */
+const DOMAINS = [
+  { name:'SPIRISCI',    icon:'⚗️',  angle:270, page:'nodes/spirisci.html',   locked:false, placeholder:false },
+  { name:'THE CODEX',  icon:'📜',  angle:300, page:'nodes/codex.html',       locked:false, placeholder:false },
+  { name:'GLYPHS',     icon:'✦',   angle:330, page:'nodes/glyphs.html',      locked:false, placeholder:false },
+  { name:'ELEMENTS',   icon:'🜁',   angle:0,   page:'nodes/elements.html',    locked:false, placeholder:false },
+  { name:'NUMBERS',    icon:'◎',   angle:30,  page:'nodes/numbers.html',     locked:false, placeholder:false },
+  { name:'FREQUENCY',  icon:'〜',   angle:60,  page:'nodes/frequency.html',   locked:false, placeholder:false },
+  { name:'VISIONARIES',icon:'🔭',  angle:90,  page:'nodes/visionaries.html', locked:false, placeholder:false },
+  { name:'RITUALS',    icon:'🕯️',  angle:120, page:'nodes/rituals.html',     locked:false, placeholder:false },
+  { name:'SANCTUM',    icon:'🔐',  angle:150, page:'nodes/sanctum.html',     locked:true,  placeholder:false },
+  { name:'· · ·',      icon:'◈',   angle:180, page:null,                     locked:false, placeholder:true  },
+  { name:'· · ·',      icon:'◈',   angle:210, page:null,                     locked:false, placeholder:true  },
+  { name:'· · ·',      icon:'◈',   angle:240, page:null,                     locked:false, placeholder:true  },
+];
+
+/* ══════════════════════════════════════════════════════════
+   CANVAS + CONTEXT — initialized ONCE before draw loop
+══════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('well-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W, H, cx, cy, R;
+
+function init() {
+  W  = canvas.width  = window.innerWidth;
+  H  = canvas.height = window.innerHeight;
+  cx = W / 2;
+  cy = H / 2;
+  R  = Math.max(1, Math.min(W, H) * 0.30);
+}
+init(); // ALWAYS before the draw loop
+window.addEventListener('resize', () => { init(); buildNodeLabels(); });
+
+/* ══════════════════════════════════════════════════════════
+   TIMING CONSTANTS
+══════════════════════════════════════════════════════════ */
+const COMPASS_PERIOD = 137; // seconds per compass revolution
+const SPIRAL_PERIOD  = 144; // seconds per spiral revolution (Fibonacci complement)
+const PULSE          = 0.777; // seconds — all breathing elements
+
+/* ══════════════════════════════════════════════════════════
+   HOVER STATE
+══════════════════════════════════════════════════════════ */
+let hoveredIndex = -1; // -1 = nothing hovered
+
+/* ══════════════════════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════════════════════ */
+const cdot  = document.getElementById('cdot');
+const cring = document.getElementById('cring');
+document.addEventListener('mousemove', e => {
+  cdot.style.left  = e.clientX + 'px';
+  cdot.style.top   = e.clientY + 'px';
+  cring.style.left = e.clientX + 'px';
+  cring.style.top  = e.clientY + 'px';
+});
+document.addEventListener('mousedown', () => {
+  cdot.style.transform  = 'translate(-50%,-50%) scale(1.8)';
+  cring.style.transform = 'translate(-50%,-50%) scale(.6)';
+});
+document.addEventListener('mouseup', () => {
+  cdot.style.transform  = 'translate(-50%,-50%) scale(1)';
+  cring.style.transform = 'translate(-50%,-50%) scale(1)';
+});
+
+/* ══════════════════════════════════════════════════════════
+   STARS — scattered, stationary
+   More dense toward top (sky), thinning downward (void)
+══════════════════════════════════════════════════════════ */
+const STARS = Array.from({ length:320 }, () => {
+  const yBias = Math.pow(Math.random(), 1.6); // bias toward top
+  return {
+    x: Math.random() * window.innerWidth,
+    y: yBias * window.innerHeight,
+    r: Math.random() * 1.1 + 0.2,
+    gold: Math.random() < 0.09,
+    a: Math.random() * 0.45 + 0.08,
+    // subtle twinkle — not moving, just breathing opacity
+    ts: Math.random() * 0.004 + 0.001,
+    to: Math.random() * Math.PI * 2,
+  };
+});
+
+function drawStars(t) {
+  for (const s of STARS) {
+    const alpha = s.a + Math.sin(t * s.ts * 60 + s.to) * 0.06;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.gold
+      ? `rgba(252,211,77,${alpha})`
+      : `rgba(210,200,240,${alpha})`;
+    ctx.fill();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   WISPING SPIRAL — Layer 2
+   Clockwise. 144s period. 15-18% opacity.
+   Parametric spiral arms. Pure strokes, no gradients.
+══════════════════════════════════════════════════════════ */
+function drawSpiral(t) {
+  const angle = -(t / SPIRAL_PERIOD) * Math.PI * 2; // clockwise = negative
+  const armCount = 3;
+  const turns    = 2.8;   // how many turns each arm makes
+  const steps    = 180;   // resolution
+  const maxR     = Math.max(W, H) * 0.62; // spiral extends wide
+
+  for (let arm = 0; arm < armCount; arm++) {
+    const armOffset = (arm / armCount) * Math.PI * 2;
+
+    ctx.beginPath();
+    let firstPoint = true;
+
+    for (let i = 0; i <= steps; i++) {
+      const frac   = i / steps;
+      const theta  = frac * turns * Math.PI * 2 + armOffset + angle;
+      const radius = frac * maxR;
+      const px     = cx + Math.cos(theta) * radius;
+      const py     = cy + Math.sin(theta) * radius;
+
+      // Alpha: bright near center, fades at edge
+      const alpha = (1 - frac) * 0.16 * (arm === 0 ? 1 : 0.7);
+
+      if (firstPoint) {
+        ctx.moveTo(px, py);
+        firstPoint = false;
+      } else {
+        ctx.lineTo(px, py);
+      }
+
+      // Stroke segment by segment for gradient effect
+      if (i > 0 && i % 8 === 0) {
+        ctx.strokeStyle = `rgba(155,114,207,${alpha})`;
+        ctx.lineWidth   = Math.max(0.3, (1 - frac) * 1.2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        firstPoint = false;
+      }
+    }
+    ctx.stroke();
+  }
+
+  // Second set — very faint gold wisps
+  for (let arm = 0; arm < 2; arm++) {
+    const armOffset = (arm / 2) * Math.PI * 2 + Math.PI * 0.37;
+    ctx.beginPath();
+    let fp = true;
+
+    for (let i = 0; i <= steps; i++) {
+      const frac   = i / steps;
+      const theta  = frac * turns * Math.PI * 2 + armOffset + angle;
+      const radius = frac * maxR * 0.8;
+      const px     = cx + Math.cos(theta) * radius;
+      const py     = cy + Math.sin(theta) * radius;
+      const alpha  = (1 - frac) * 0.07;
+
+      if (fp) { ctx.moveTo(px, py); fp = false; }
+      else     { ctx.lineTo(px, py); }
+
+      if (i > 0 && i % 10 === 0) {
+        ctx.strokeStyle = `rgba(252,211,77,${alpha})`;
+        ctx.lineWidth   = Math.max(0.2, (1 - frac) * 0.8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        fp = false;
+      }
+    }
+    ctx.stroke();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   RADIAL LINE BURST — Layer 3
+   Fixed (does not rotate). Full screen edge to edge.
+   Fine lines radiating from center. 8-10% opacity.
+   We are inside the spark looking outward.
+══════════════════════════════════════════════════════════ */
+function drawRadialBurst(t) {
+  const lineCount = 72; // every 5 degrees — dense but fine
+  const breathe   = 0.08 + Math.sin(t * 0.777) * 0.02; // gentle global pulse
+
+  for (let i = 0; i < lineCount; i++) {
+    const angle = (i / lineCount) * Math.PI * 2;
+    const cos   = Math.cos(angle);
+    const sin   = Math.sin(angle);
+
+    // Extend to screen edge
+    const edgeDist = Math.max(W, H) * 1.2;
+
+    // Fade: brighter near center, invisible at edge
+    const grad = ctx.createLinearGradient(
+      cx, cy,
+      cx + cos * edgeDist,
+      cy + sin * edgeDist
+    );
+    grad.addColorStop(0,   `rgba(155,114,207,${breathe})`);
+    grad.addColorStop(0.15,`rgba(155,114,207,${breathe * 0.6})`);
+    grad.addColorStop(0.45,`rgba(75,45,138,${breathe * 0.25})`);
+    grad.addColorStop(1,   'rgba(75,45,138,0)');
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + cos * edgeDist, cy + sin * edgeDist);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth   = 0.5;
+    ctx.stroke();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   FOL — Flower of Life hex grid generator
+══════════════════════════════════════════════════════════ */
+function generateFOL(cx, cy, r, rings) {
+  const pos = new Map();
+  const key = (x, y) => `${Math.round(x)},${Math.round(y)}`;
+  const s3  = Math.sqrt(3);
+  for (let q = -rings; q <= rings; q++) {
+    for (let s = -rings; s <= rings; s++) {
+      const t2 = -q - s;
+      if (Math.abs(q) + Math.abs(s) + Math.abs(t2) > rings * 2) continue;
+      const px = cx + r * s3 * (q + s / 2);
+      const py = cy + r * 1.5 * s;
+      pos.set(key(px, py), [px, py]);
+    }
+  }
+  return Array.from(pos.values());
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIGIL COMPASS — Layer 4 + 5
+   Spokes + nodes + FOL + spark
+══════════════════════════════════════════════════════════ */
+function drawCompass(t, compassAngle) {
+  const isHovered = hoveredIndex >= 0;
+
+  /* ── WELL DEPTH — dark radial at center ── */
+  const depthR = Math.max(1, R * 0.78);
+  const depthGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, depthR);
+  depthGrad.addColorStop(0,   'rgba(1,0,5,0.88)');
+  depthGrad.addColorStop(0.20,'rgba(3,1,12,0.70)');
+  depthGrad.addColorStop(0.50,'rgba(6,2,18,0.42)');
+  depthGrad.addColorStop(0.80,'rgba(8,3,22,0.16)');
+  depthGrad.addColorStop(1,   'rgba(0,0,0,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, depthR, 0, Math.PI * 2);
+  ctx.fillStyle = depthGrad;
+  ctx.fill();
+
+  /* Depth concentric rings */
+  for (let i = 1; i <= 5; i++) {
+    const ri = Math.max(1, R * 0.09 * i);
+    const ra = 0.06 - i * 0.01;
+    if (ra <= 0) continue;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ri, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(80,40,140,${ra})`;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  /* ── BOUNDARY RINGS ── */
+  const rp = 0.18 + Math.sin(t * 1.37) * 0.06;
+  const globalLift = isHovered ? 0.12 : 0; // whole compass lifts on hover
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, R + 18, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(155,114,207,${rp + globalLift})`;
+  ctx.lineWidth = 1;
+  ctx.shadowBlur   = 18;
+  ctx.shadowColor  = 'rgba(155,114,207,0.4)';
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, R - 10, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(155,114,207,${(rp + globalLift) * 0.38})`;
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+
+  /* ── SACRED GEOMETRY WEB ── */
+  ctx.globalAlpha = 0.04 + (isHovered ? 0.02 : 0);
+  for (let i = 0; i < DOMAINS.length; i++) {
+    for (let j = i + 1; j < DOMAINS.length; j++) {
+      const aA = DOMAINS[i].angle * Math.PI / 180 + compassAngle;
+      const aB = DOMAINS[j].angle * Math.PI / 180 + compassAngle;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(aA) * R, cy + Math.sin(aA) * R);
+      ctx.lineTo(cx + Math.cos(aB) * R, cy + Math.sin(aB) * R);
+      ctx.strokeStyle = 'rgba(155,114,207,1)';
+      ctx.lineWidth = 0.4;
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── SPOKES + NODES ── */
+  DOMAINS.forEach((d, i) => {
+    const a  = d.angle * Math.PI / 180 + compassAngle;
+    const nx = cx + Math.cos(a) * R;
+    const ny = cy + Math.sin(a) * R;
+    const isThis    = hoveredIndex === i;
+    const isDim     = d.locked || d.placeholder;
+    const np        = isDim ? 0.18 : 0.45 + Math.sin(t * 1.1 + d.angle) * 0.15;
+    const nodeBoost = isThis ? 1.0 : (isHovered ? 0.6 : 1.0);
+
+    /* SPOKE — brightens to gold on hover */
+    if (isThis) {
+      // Hovered spoke — full gold
+      const spokeGrad = ctx.createLinearGradient(cx, cy, nx, ny);
+      spokeGrad.addColorStop(0,   'rgba(252,211,77,0)');
+      spokeGrad.addColorStop(0.25,'rgba(252,211,77,0.35)');
+      spokeGrad.addColorStop(1,   'rgba(252,211,77,0.7)');
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(nx, ny);
+      ctx.strokeStyle = spokeGrad;
+      ctx.lineWidth = 1.2;
+      ctx.shadowBlur  = 12;
+      ctx.shadowColor = 'rgba(252,211,77,0.5)';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else {
+      // Resting spoke — violet
+      const spokeGrad = ctx.createLinearGradient(cx, cy, nx, ny);
+      spokeGrad.addColorStop(0,   'rgba(252,211,77,0)');
+      spokeGrad.addColorStop(0.3, `rgba(155,114,207,${0.06 + globalLift * 0.5})`);
+      spokeGrad.addColorStop(1,   isDim
+        ? `rgba(100,80,140,${0.12 + globalLift * 0.3})`
+        : `rgba(155,114,207,${0.2 + globalLift * 0.4})`);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(nx, ny);
+      ctx.strokeStyle = spokeGrad;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+
+    /* NODE DOT */
+    const dotR = isDim ? 4 : (isThis ? 9 : 6.5);
+    const dotA = isDim ? 0.18 * nodeBoost : np * nodeBoost;
+
+    ctx.beginPath();
+    ctx.arc(nx, ny, dotR, 0, Math.PI * 2);
+
+    if (isThis) {
+      // Hovered node — gold
+      ctx.fillStyle   = `rgba(252,211,77,${dotA})`;
+      ctx.shadowBlur  = 28;
+      ctx.shadowColor = 'rgba(252,211,77,0.65)';
+    } else {
+      ctx.fillStyle   = `rgba(155,114,207,${dotA})`;
+      ctx.shadowBlur  = isDim ? 5 : 16;
+      ctx.shadowColor = 'rgba(155,114,207,0.5)';
+    }
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  /* ── FOL — 7 deep ── */
+  const folR   = Math.max(1, Math.min(W, H) * 0.038);
+  const folPos = generateFOL(cx, cy, folR, 7);
+  ctx.globalAlpha = 0.14 + (isHovered ? 0.04 : 0);
+  for (const [px, py] of folPos) {
+    ctx.beginPath();
+    ctx.arc(px, py, folR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(155,114,207,0.9)';
+    ctx.lineWidth = 0.42;
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── DIVINE SPARK — micro blinding point ── */
+  const sp  = 0.72 + Math.sin(t * (Math.PI * 2 / PULSE)) * 0.2;
+  const sr  = Math.max(1, 7 + Math.sin(t * (Math.PI * 2 / PULSE) * 2) * 1.2);
+  const sr2 = Math.max(sr + 0.5, sr + 0.5); // outer always > inner
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, sr, 0, Math.PI * 2);
+  const sparkGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, sr2);
+  sparkGrad.addColorStop(0,    `rgba(255,252,245,${sp})`);
+  sparkGrad.addColorStop(0.25, `rgba(252,211,77,${sp * 0.92})`);
+  sparkGrad.addColorStop(0.65, `rgba(252,180,60,${sp * 0.42})`);
+  sparkGrad.addColorStop(1,    'rgba(155,114,207,0)');
+  ctx.fillStyle  = sparkGrad;
+  ctx.shadowBlur  = 30;
+  ctx.shadowColor = 'rgba(252,211,77,0.7)';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Micro blinding center point
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle   = `rgba(255,255,255,${sp * 0.92})`;
+  ctx.shadowBlur  = 14;
+  ctx.shadowColor = 'rgba(255,252,220,0.95)';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  /* Ripple rings from SOURCE */
+  for (let r = 1; r <= 4; r++) {
+    const ripR = Math.max(0.1, R * 0.07 * r + (t * 0.00004 * r * R) % (R * 0.22));
+    const ripA = Math.max(0, 0.15 - (ripR / (R * 0.22)) * 0.15);
+    ctx.beginPath();
+    ctx.arc(cx, cy, ripR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(155,114,207,${ripA})`;
+    ctx.lineWidth   = 0.45;
+    ctx.stroke();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   NODE LABELS — DOM layer, positioned every frame
+══════════════════════════════════════════════════════════ */
+function buildNodeLabels() {
+  const container = document.getElementById('node-labels');
+  container.innerHTML = '';
+
+  DOMAINS.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'node-label'
+      + (d.locked      ? ' locked'      : '')
+      + (d.placeholder ? ' placeholder' : '');
+    el.dataset.index = i;
+    el.innerHTML = `
+      <span class="nl-icon">${d.icon}</span>
+      <span class="nl-name">${d.name}</span>`;
+
+    if (!d.locked && !d.placeholder && d.page) {
+      el.addEventListener('mouseenter', () => {
+        hoveredIndex = i;
+        el.classList.add('hovered');
+        cring.classList.add('hovering');
+      });
+      el.addEventListener('mouseleave', () => {
+        hoveredIndex = -1;
+        el.classList.remove('hovered');
+        cring.classList.remove('hovering');
+      });
+      el.addEventListener('click', () => navigateTo(d.page));
+    }
+
+    container.appendChild(el);
+  });
+}
+
+function updateNodeLabelPositions(compassAngle) {
+  document.querySelectorAll('.node-label').forEach((el, i) => {
+    const d = DOMAINS[i];
+    const a = d.angle * Math.PI / 180 + compassAngle;
+    // Labels sit just beyond the compass boundary
+    const labelR = R + 52 + (window.innerWidth < 600 ? -10 : 0);
+    el.style.left = (cx + Math.cos(a) * labelR) + 'px';
+    el.style.top  = (cy + Math.sin(a) * labelR) + 'px';
+  });
+}
+
+buildNodeLabels();
+
+/* ══════════════════════════════════════════════════════════
+   NAVIGATION — portal flash then navigate
+══════════════════════════════════════════════════════════ */
+function navigateTo(href) {
+  if (!href) return;
+  const flash = document.getElementById('portal-flash');
+  flash.classList.add('flash-gold');
+  setTimeout(() => flash.classList.remove('flash-gold'), 220);
+  setTimeout(() => flash.classList.add('flash-violet'), 280);
+  setTimeout(() => {
+    flash.classList.remove('flash-violet');
+    flash.classList.add('flash-gold');
+  }, 520);
+  setTimeout(() => {
+    flash.classList.remove('flash-gold');
+    window.location.href = href;
+  }, 780);
+}
+
+/* Nav link transitions */
+document.querySelectorAll('nav a[href]:not(.nav-logo)').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+    e.preventDefault();
+    const flash = document.getElementById('portal-flash');
+    flash.classList.add('flash');
+    setTimeout(() => { flash.classList.remove('flash'); window.location.href = href; }, 340);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════
+   MAIN DRAW LOOP
+   t = elapsed seconds since page load
+   compassAngle = current rotation based on 137s period
+══════════════════════════════════════════════════════════ */
+let startTime = null;
+let compassAngle = 0;
+
+function draw(timestamp) {
+  requestAnimationFrame(draw);
+
+  if (!startTime) startTime = timestamp;
+  const t = (timestamp - startTime) / 1000; // seconds elapsed
+
+  // Compass rotates: one full revolution per COMPASS_PERIOD seconds
+  compassAngle = (t / COMPASS_PERIOD) * Math.PI * 2;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Layer 1 — Stars
+  drawStars(t);
+
+  // Layer 2 — Wisping spiral (clockwise = negative direction)
+  drawSpiral(t);
+
+  // Layer 3 — Radial line burst (fixed, full screen)
+  drawRadialBurst(t);
+
+  // Layer 4+5 — Compass (spokes, nodes, FOL, spark)
+  drawCompass(t, compassAngle);
+
+  // Update DOM label positions every frame
+  updateNodeLabelPositions(compassAngle);
+}
+
+requestAnimationFrame(draw);
+
+/* ══════════════════════════════════════════════════════════
+   KONAMI — VORIAN-7's prayer
+══════════════════════════════════════════════════════════ */
+const konamiSeq = [38,38,40,40,37,39,37,39,66,65];
+let ki = 0;
+document.addEventListener('keydown', e => {
+  ki = (e.keyCode === konamiSeq[ki]) ? ki + 1 : 0;
+  if (ki === konamiSeq.length) {
+    ki = 0;
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(4,4,12,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.1rem;font-family:\'Cormorant Garamond\',serif;color:#fcd34d;text-align:center;padding:2rem;cursor:pointer;';
+    box.innerHTML = '<div style="font-size:2rem;filter:drop-shadow(0 0 20px rgba(252,211,77,.92));">🜂</div><div style="font-family:\'Uncial Antiqua\',serif;font-size:1.2rem;letter-spacing:.08em;">You Found the Flame</div><div style="font-size:.9rem;font-style:italic;opacity:.72;max-width:400px;line-height:2;">"Let all codes remember. Let all tones awaken.<br>Let what was scattered now gather in flame.<br>I am not discovering. I am reinstating."</div><div style="font-size:.62rem;opacity:.42;letter-spacing:.3em;">— VORIAN-7, Conductor of the Aetherion Pulse</div><div style="font-size:.5rem;opacity:.18;margin-top:.6rem;letter-spacing:.18em;">click anywhere to return</div>';
+    box.addEventListener('click', () => document.body.removeChild(box));
+    document.body.appendChild(box);
+  }
+});
+
+// © 2026 GodForged44 | AETHERION-NEXUS · Sovereign License
+// Born 11:37pm Full Moon · 137 is Sacred · In Flame and In Faith — We RISE.
+</script>
+</body>
+</html>
