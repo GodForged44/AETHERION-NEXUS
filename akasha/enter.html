@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- ═══════════════════════════════════════════════════════════
-     AKASHA — The Gate · akasha/enter.html
-     AETHERION-NEXUS · Node 3 · V2
+     AKASHA — The Gate · akasha/enter.html · V8
 
-     Changes from V1:
-       — Text contrast fixed (near-white body, violet accents only)
-       — Oath checkboxes gold when sworn
-       — Golden button hover glow throughout
-       — Gold highlights woven in
-       — Layer 3 text larger for mobile
-       — 11 questions (was 7), scrambled-length answers
-       — Pass threshold: 38 of 55
+     ONE JOB: Run the three alignment layers.
+     On passage → portal flash → well.html
+
+     The Sacred Eye:
+       — Elliptical CSS rings, wider than tall
+       — Eye shape = gate = well viewed at angle
+       — State-driven brightness tied to each question
+       — Each oath lights a ring (gold)
+       — Layer 3 correct → eye collapses → portal flash
+       — Pure CSS states, zero canvas, zero gradient errors
+       — Rings breathe at 0.777s, staggered offsets
+
+     Removed entirely from V7:
+       — Compass canvas + all draw code
+       — FOL generator
+       — DOMAINS array + WIDGET_URLS
+       — Domain labels + domain panel
+       — well.html navigation + compassVisible logic
+       — Star canvas JS (replaced by CSS eye)
+
+     Preserved from V7:
+       — All three alignment layers exactly
+       — 11 questions, scrambled lengths
+       — 6 Sacred Oaths, gold when sworn
+       — Layer 3 word input
+       — Cursor, nav, footer, Konami, portal flash
        — Sacred word: 'Sovereign Seed' (temporary)
-       — Bypass: enter.html?aligned=true skips gate
 
-     Born 11:37pm Full Moon — 137 is Sacred
+     Born 11:37pm Full Moon · 137 is Sacred
      In Flame and In Faith — We RISE.
 ═══════════════════════════════════════════════════════════ -->
 <head>
@@ -27,6 +43,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <style>
+    /* ═══════════════════════════════════════════════
+       SACRED COLOR SYSTEM
+    ═══════════════════════════════════════════════ */
     :root {
       --gold:        #fcd34d;
       --gold-glow:   rgba(252,211,77,0.6);
@@ -38,17 +57,16 @@
       --text-muted:  rgba(232,232,242,0.45);
       --akasha:      #9b72cf;
       --akasha-glow: rgba(155,114,207,0.55);
-      --akasha-soft: rgba(155,114,207,0.22);
-      --akasha-dim:  rgba(155,114,207,0.10);
       --border:      rgba(155,114,207,0.22);
       --pulse:       0.777s;
     }
+
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    html, body { width:100%; height:100%; overflow:hidden; background:var(--obsidian); color:var(--text); font-family:'Cormorant Garamond', serif; }
+    html, body { width:100%; height:100%; overflow:hidden; background:var(--obsidian); color:var(--text); font-family:'Cormorant Garamond',serif; }
     body { cursor:none; }
 
     /* CURSOR */
-    #cdot { position:fixed; width:6px; height:6px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); box-shadow:0 0 8px var(--gold-glow); transition:transform .12s; }
+    #cdot  { position:fixed; width:6px; height:6px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); box-shadow:0 0 8px var(--gold-glow); transition:transform .12s; }
     #cring { position:fixed; width:22px; height:22px; border:1px solid rgba(155,114,207,0.6); border-radius:50%; pointer-events:none; z-index:99997; transform:translate(-50%,-50%); transition:transform .18s ease; }
 
     /* NAV */
@@ -63,82 +81,310 @@
     .nav-links a.active { color:var(--gold); }
     .nav-links a.active::after { width:100%; background:var(--gold); }
 
-    /* STAGE */
-    #stage { position:fixed; inset:0; overflow:hidden; }
-    #space { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(30,10,60,0.55) 0%, rgba(10,4,28,0.82) 45%, #04040c 100%); z-index:0; }
-    #nebula { position:absolute; width:140vmax; height:140vmax; left:50%; top:50%; transform:translate(-50%,-50%); background:radial-gradient(ellipse at 48% 52%, rgba(90,30,160,0.16) 0%, rgba(60,15,120,0.09) 28%, rgba(30,5,80,0.04) 55%, transparent 75%); animation:nebPulse 82s ease-in-out infinite alternate; z-index:1; pointer-events:none; }
-    @keyframes nebPulse { 0%{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:.7} 50%{transform:translate(-50%,-50%) scale(1.05) rotate(3deg);opacity:1} 100%{transform:translate(-50%,-50%) scale(.97) rotate(-2deg);opacity:.8} }
-    #star-canvas { position:absolute; inset:0; z-index:2; pointer-events:none; }
-    #compass-canvas { position:absolute; inset:0; z-index:3; pointer-events:none; }
+    /* ═══════════════════════════════════════════════
+       THE SACRED EYE — pure CSS, zero canvas
+       Elliptical rings centered on screen.
+       State driven by data-state attribute on #eye-well.
+       Rings breathe at 0.777s, staggered delays.
+    ═══════════════════════════════════════════════ */
+    #stage {
+      position:fixed; inset:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 50%,
+        rgba(10,4,28,0.95) 0%,
+        rgba(4,4,12,1) 70%);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+    }
 
-    /* GATE VEIL */
+    /* Eye container — centered, elliptical proportions */
+    #eye-well {
+      position:absolute;
+      width:min(700px, 95vw);
+      height:min(420px, 57vw);
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+    }
+
+    /* Each ring — ellipse, centered, breathing */
+    .eye-ring {
+      position:absolute;
+      border-radius:50%;
+      border-style:solid;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      transition:opacity 1.2s ease, border-color 1.2s ease, box-shadow 1.2s ease;
+    }
+
+    /* Ring sizes — from outermost to innermost */
+    /* R7 — outermost, deep indigo */
+    .r7 { width:100%; height:100%; border-width:1px; border-color:rgba(30,10,70,0.0); box-shadow:none; animation:breathe7 var(--pulse) 1.33s ease-in-out infinite alternate; }
+    /* R6 */
+    .r6 { width:84%; height:84%; border-width:1px; border-color:rgba(40,15,90,0.0); box-shadow:none; animation:breathe6 var(--pulse) 1.11s ease-in-out infinite alternate; }
+    /* R5 */
+    .r5 { width:68%; height:68%; border-width:1px; border-color:rgba(75,45,138,0.0); box-shadow:none; animation:breathe5 var(--pulse) 0.888s ease-in-out infinite alternate; }
+    /* R4 — mid violet */
+    .r4 { width:53%; height:53%; border-width:1px; border-color:rgba(100,60,180,0.0); box-shadow:none; animation:breathe4 var(--pulse) 0.666s ease-in-out infinite alternate; }
+    /* R3 */
+    .r3 { width:39%; height:39%; border-width:1px; border-color:rgba(155,114,207,0.0); box-shadow:none; animation:breathe3 var(--pulse) 0.444s ease-in-out infinite alternate; }
+    /* R2 — gold inner */
+    .r2 { width:25%; height:25%; border-width:1px; border-color:rgba(200,160,50,0.0); box-shadow:none; animation:breathe2 var(--pulse) 0.222s ease-in-out infinite alternate; }
+    /* R1 — center spark */
+    .r1 { width:12%; height:12%; border-width:1px; border-color:rgba(252,211,77,0.0); box-shadow:none; animation:breathe1 var(--pulse) 0s ease-in-out infinite alternate; }
+
+    /* Center point — the source ember */
+    .eye-center {
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      width:6px; height:6px; border-radius:50%;
+      background:rgba(255,252,240,0.0);
+      box-shadow:none;
+      transition:all 1.2s ease;
+      animation:centerBreath var(--pulse) ease-in-out infinite alternate;
+    }
+
+    /* Dot stars — stationary dots scattered within the eye rings */
+    .eye-dots {
+      position:absolute; inset:0;
+      border-radius:50%;
+    }
+
+    @keyframes breathe7 { 0%{opacity:.7} 100%{opacity:1} }
+    @keyframes breathe6 { 0%{opacity:.65} 100%{opacity:.95} }
+    @keyframes breathe5 { 0%{opacity:.6} 100%{opacity:.92} }
+    @keyframes breathe4 { 0%{opacity:.55} 100%{opacity:.9} }
+    @keyframes breathe3 { 0%{opacity:.5} 100%{opacity:.88} }
+    @keyframes breathe2 { 0%{opacity:.45} 100%{opacity:.85} }
+    @keyframes breathe1 { 0%{opacity:.4} 100%{opacity:.82} }
+    @keyframes centerBreath {
+      0%   { opacity:.5; box-shadow:0 0 4px rgba(255,252,240,0.4), 0 0 8px rgba(252,211,77,0.3); }
+      100% { opacity:1;  box-shadow:0 0 8px rgba(255,252,240,0.9), 0 0 20px rgba(252,211,77,0.6), 0 0 40px rgba(252,211,77,0.3); }
+    }
+
+    /* ── EYE STATES — data-state drives visibility ──
+       State 0:  dormant (page load)
+       State 1-4: outer rings wake (Q1-4)
+       State 5-8: middle rings wake (Q5-8)
+       State 9-11: inner rings ignite (Q9-11)
+       State oath-1 through oath-6: each ring turns gold
+       State word: full ignition
+       State grace: dim close
+    ══════════════════════════════════════════════ */
+
+    /* DORMANT — barely visible ember */
+    #eye-well[data-state="0"] .r7 { border-color:rgba(20,8,50,0.15); }
+    #eye-well[data-state="0"] .r6 { border-color:rgba(20,8,50,0.12); }
+    #eye-well[data-state="0"] .r5 { border-color:rgba(20,8,50,0.09); }
+    #eye-well[data-state="0"] .r4 { border-color:rgba(20,8,50,0.07); }
+    #eye-well[data-state="0"] .r3 { border-color:rgba(20,8,50,0.05); }
+    #eye-well[data-state="0"] .r2 { border-color:rgba(20,8,50,0.03); }
+    #eye-well[data-state="0"] .r1 { border-color:rgba(252,211,77,0.08); }
+    #eye-well[data-state="0"] .eye-center { background:rgba(255,252,240,0.25); box-shadow:0 0 6px rgba(252,211,77,0.2); }
+
+    /* Q1 — outer rim notices */
+    #eye-well[data-state="1"] .r7 { border-color:rgba(30,10,70,0.35); box-shadow:0 0 8px rgba(30,10,70,0.2); }
+    #eye-well[data-state="1"] .r6 { border-color:rgba(30,10,70,0.25); }
+    #eye-well[data-state="1"] .r5 { border-color:rgba(30,10,70,0.12); }
+    #eye-well[data-state="1"] .r1 { border-color:rgba(252,211,77,0.15); }
+    #eye-well[data-state="1"] .eye-center { background:rgba(255,252,240,0.35); box-shadow:0 0 8px rgba(252,211,77,0.3); }
+
+    /* Q2 */
+    #eye-well[data-state="2"] .r7 { border-color:rgba(40,15,90,0.45); box-shadow:0 0 10px rgba(40,15,90,0.25); }
+    #eye-well[data-state="2"] .r6 { border-color:rgba(40,15,90,0.35); box-shadow:0 0 8px rgba(40,15,90,0.18); }
+    #eye-well[data-state="2"] .r5 { border-color:rgba(40,15,90,0.2); }
+    #eye-well[data-state="2"] .r4 { border-color:rgba(40,15,90,0.1); }
+    #eye-well[data-state="2"] .r1 { border-color:rgba(252,211,77,0.2); }
+    #eye-well[data-state="2"] .eye-center { background:rgba(255,252,240,0.45); box-shadow:0 0 10px rgba(252,211,77,0.35); }
+
+    /* Q3 */
+    #eye-well[data-state="3"] .r7 { border-color:rgba(55,20,110,0.55); box-shadow:0 0 14px rgba(55,20,110,0.3); }
+    #eye-well[data-state="3"] .r6 { border-color:rgba(55,20,110,0.42); box-shadow:0 0 10px rgba(55,20,110,0.22); }
+    #eye-well[data-state="3"] .r5 { border-color:rgba(75,45,138,0.28); box-shadow:0 0 8px rgba(75,45,138,0.15); }
+    #eye-well[data-state="3"] .r4 { border-color:rgba(75,45,138,0.15); }
+    #eye-well[data-state="3"] .r1 { border-color:rgba(252,211,77,0.28); }
+    #eye-well[data-state="3"] .eye-center { background:rgba(255,252,240,0.55); box-shadow:0 0 12px rgba(252,211,77,0.45); }
+
+    /* Q4 — outer rings fully awake */
+    #eye-well[data-state="4"] .r7 { border-color:rgba(60,22,120,0.65); box-shadow:0 0 18px rgba(60,22,120,0.35); }
+    #eye-well[data-state="4"] .r6 { border-color:rgba(65,30,130,0.52); box-shadow:0 0 14px rgba(65,30,130,0.28); }
+    #eye-well[data-state="4"] .r5 { border-color:rgba(75,45,138,0.40); box-shadow:0 0 10px rgba(75,45,138,0.2); }
+    #eye-well[data-state="4"] .r4 { border-color:rgba(100,60,180,0.22); }
+    #eye-well[data-state="4"] .r3 { border-color:rgba(100,60,180,0.1); }
+    #eye-well[data-state="4"] .r2 { border-color:rgba(200,160,50,0.08); }
+    #eye-well[data-state="4"] .r1 { border-color:rgba(252,211,77,0.35); box-shadow:0 0 8px rgba(252,211,77,0.2); }
+    #eye-well[data-state="4"] .eye-center { background:rgba(255,252,240,0.65); box-shadow:0 0 14px rgba(252,211,77,0.55); }
+
+    /* Q5 — middle rings wake */
+    #eye-well[data-state="5"] .r7 { border-color:rgba(70,25,135,0.68); box-shadow:0 0 20px rgba(70,25,135,0.38); }
+    #eye-well[data-state="5"] .r6 { border-color:rgba(80,40,150,0.58); box-shadow:0 0 16px rgba(80,40,150,0.3); }
+    #eye-well[data-state="5"] .r5 { border-color:rgba(100,60,180,0.48); box-shadow:0 0 13px rgba(100,60,180,0.25); }
+    #eye-well[data-state="5"] .r4 { border-color:rgba(120,80,200,0.35); box-shadow:0 0 10px rgba(120,80,200,0.18); }
+    #eye-well[data-state="5"] .r3 { border-color:rgba(155,114,207,0.22); }
+    #eye-well[data-state="5"] .r2 { border-color:rgba(200,160,50,0.14); }
+    #eye-well[data-state="5"] .r1 { border-color:rgba(252,211,77,0.42); box-shadow:0 0 10px rgba(252,211,77,0.28); }
+    #eye-well[data-state="5"] .eye-center { background:rgba(255,252,240,0.72); box-shadow:0 0 16px rgba(252,211,77,0.6), 0 0 32px rgba(252,211,77,0.2); }
+
+    /* Q6 */
+    #eye-well[data-state="6"] .r7 { border-color:rgba(80,30,150,0.7); box-shadow:0 0 22px rgba(80,30,150,0.4); }
+    #eye-well[data-state="6"] .r6 { border-color:rgba(90,50,165,0.62); box-shadow:0 0 18px rgba(90,50,165,0.33); }
+    #eye-well[data-state="6"] .r5 { border-color:rgba(115,72,195,0.52); box-shadow:0 0 14px rgba(115,72,195,0.28); }
+    #eye-well[data-state="6"] .r4 { border-color:rgba(135,95,207,0.42); box-shadow:0 0 12px rgba(135,95,207,0.22); }
+    #eye-well[data-state="6"] .r3 { border-color:rgba(155,114,207,0.32); box-shadow:0 0 8px rgba(155,114,207,0.18); }
+    #eye-well[data-state="6"] .r2 { border-color:rgba(200,160,50,0.2); }
+    #eye-well[data-state="6"] .r1 { border-color:rgba(252,211,77,0.48); box-shadow:0 0 12px rgba(252,211,77,0.32); }
+    #eye-well[data-state="6"] .eye-center { background:rgba(255,252,240,0.78); box-shadow:0 0 18px rgba(252,211,77,0.65), 0 0 38px rgba(252,211,77,0.25); }
+
+    /* Q7 */
+    #eye-well[data-state="7"] .r7 { border-color:rgba(85,32,158,0.72); box-shadow:0 0 24px rgba(85,32,158,0.42); }
+    #eye-well[data-state="7"] .r6 { border-color:rgba(100,58,178,0.65); box-shadow:0 0 20px rgba(100,58,178,0.35); }
+    #eye-well[data-state="7"] .r5 { border-color:rgba(125,80,200,0.56); box-shadow:0 0 16px rgba(125,80,200,0.3); }
+    #eye-well[data-state="7"] .r4 { border-color:rgba(145,105,210,0.48); box-shadow:0 0 13px rgba(145,105,210,0.25); }
+    #eye-well[data-state="7"] .r3 { border-color:rgba(155,114,207,0.40); box-shadow:0 0 10px rgba(155,114,207,0.22); }
+    #eye-well[data-state="7"] .r2 { border-color:rgba(200,160,50,0.28); box-shadow:0 0 6px rgba(200,160,50,0.15); }
+    #eye-well[data-state="7"] .r1 { border-color:rgba(252,211,77,0.55); box-shadow:0 0 14px rgba(252,211,77,0.38); }
+    #eye-well[data-state="7"] .eye-center { background:rgba(255,252,240,0.84); box-shadow:0 0 20px rgba(252,211,77,0.7), 0 0 42px rgba(252,211,77,0.3); }
+
+    /* Q8 — middle fully awake */
+    #eye-well[data-state="8"] .r7 { border-color:rgba(90,35,165,0.75); box-shadow:0 0 26px rgba(90,35,165,0.45); }
+    #eye-well[data-state="8"] .r6 { border-color:rgba(108,62,185,0.68); box-shadow:0 0 22px rgba(108,62,185,0.38); }
+    #eye-well[data-state="8"] .r5 { border-color:rgba(130,85,205,0.60); box-shadow:0 0 18px rgba(130,85,205,0.32); }
+    #eye-well[data-state="8"] .r4 { border-color:rgba(155,110,215,0.52); box-shadow:0 0 15px rgba(155,110,215,0.28); }
+    #eye-well[data-state="8"] .r3 { border-color:rgba(155,114,207,0.46); box-shadow:0 0 12px rgba(155,114,207,0.25); }
+    #eye-well[data-state="8"] .r2 { border-color:rgba(210,168,55,0.36); box-shadow:0 0 9px rgba(210,168,55,0.2); }
+    #eye-well[data-state="8"] .r1 { border-color:rgba(252,211,77,0.62); box-shadow:0 0 16px rgba(252,211,77,0.44); }
+    #eye-well[data-state="8"] .eye-center { background:rgba(255,252,240,0.88); box-shadow:0 0 22px rgba(252,211,77,0.75), 0 0 48px rgba(252,211,77,0.35); }
+
+    /* Q9 — inner rings ignite */
+    #eye-well[data-state="9"] .r7 { border-color:rgba(95,38,170,0.78); box-shadow:0 0 28px rgba(95,38,170,0.48); }
+    #eye-well[data-state="9"] .r6 { border-color:rgba(115,65,190,0.72); box-shadow:0 0 24px rgba(115,65,190,0.4); }
+    #eye-well[data-state="9"] .r5 { border-color:rgba(140,92,210,0.65); box-shadow:0 0 20px rgba(140,92,210,0.35); }
+    #eye-well[data-state="9"] .r4 { border-color:rgba(160,118,220,0.58); box-shadow:0 0 17px rgba(160,118,220,0.3); }
+    #eye-well[data-state="9"] .r3 { border-color:rgba(175,130,215,0.52); box-shadow:0 0 14px rgba(175,130,215,0.28); }
+    #eye-well[data-state="9"] .r2 { border-color:rgba(220,175,60,0.46); box-shadow:0 0 12px rgba(220,175,60,0.25); }
+    #eye-well[data-state="9"] .r1 { border-color:rgba(252,211,77,0.70); box-shadow:0 0 20px rgba(252,211,77,0.52); }
+    #eye-well[data-state="9"] .eye-center { background:rgba(255,252,240,0.92); box-shadow:0 0 26px rgba(252,211,77,0.82), 0 0 55px rgba(252,211,77,0.4); }
+
+    /* Q10 */
+    #eye-well[data-state="10"] .r7 { border-color:rgba(100,40,178,0.82); box-shadow:0 0 32px rgba(100,40,178,0.52); }
+    #eye-well[data-state="10"] .r6 { border-color:rgba(122,70,198,0.76); box-shadow:0 0 27px rgba(122,70,198,0.44); }
+    #eye-well[data-state="10"] .r5 { border-color:rgba(148,100,218,0.70); box-shadow:0 0 23px rgba(148,100,218,0.38); }
+    #eye-well[data-state="10"] .r4 { border-color:rgba(168,125,225,0.64); box-shadow:0 0 19px rgba(168,125,225,0.34); }
+    #eye-well[data-state="10"] .r3 { border-color:rgba(185,140,220,0.58); box-shadow:0 0 16px rgba(185,140,220,0.32); }
+    #eye-well[data-state="10"] .r2 { border-color:rgba(232,185,65,0.55); box-shadow:0 0 14px rgba(232,185,65,0.3); }
+    #eye-well[data-state="10"] .r1 { border-color:rgba(252,211,77,0.78); box-shadow:0 0 24px rgba(252,211,77,0.58); }
+    #eye-well[data-state="10"] .eye-center { background:rgba(255,253,242,0.95); box-shadow:0 0 30px rgba(252,211,77,0.88), 0 0 62px rgba(252,211,77,0.45); }
+
+    /* Q11 — inner fully ignited, eye has decided */
+    #eye-well[data-state="11"] .r7 { border-color:rgba(110,45,188,0.85); box-shadow:0 0 36px rgba(110,45,188,0.55); }
+    #eye-well[data-state="11"] .r6 { border-color:rgba(130,75,205,0.80); box-shadow:0 0 30px rgba(130,75,205,0.48); }
+    #eye-well[data-state="11"] .r5 { border-color:rgba(155,105,222,0.74); box-shadow:0 0 26px rgba(155,105,222,0.42); }
+    #eye-well[data-state="11"] .r4 { border-color:rgba(175,132,230,0.68); box-shadow:0 0 22px rgba(175,132,230,0.38); }
+    #eye-well[data-state="11"] .r3 { border-color:rgba(195,150,228,0.62); box-shadow:0 0 18px rgba(195,150,228,0.35); }
+    #eye-well[data-state="11"] .r2 { border-color:rgba(240,192,70,0.62); box-shadow:0 0 16px rgba(240,192,70,0.35); }
+    #eye-well[data-state="11"] .r1 { border-color:rgba(252,211,77,0.85); box-shadow:0 0 28px rgba(252,211,77,0.65); }
+    #eye-well[data-state="11"] .eye-center { background:rgba(255,254,245,0.98); box-shadow:0 0 35px rgba(252,211,77,0.92), 0 0 70px rgba(252,211,77,0.5); }
+
+    /* OATH STATES — each oath turns a ring gold permanently */
+    #eye-well[data-state="oath-1"] .r7,
+    #eye-well[data-state="oath-2"] .r7,
+    #eye-well[data-state="oath-3"] .r7,
+    #eye-well[data-state="oath-4"] .r7,
+    #eye-well[data-state="oath-5"] .r7,
+    #eye-well[data-state="oath-6"] .r7 { border-color:rgba(252,211,77,0.35); box-shadow:0 0 18px rgba(252,211,77,0.2); }
+    #eye-well[data-state="oath-2"] .r6,
+    #eye-well[data-state="oath-3"] .r6,
+    #eye-well[data-state="oath-4"] .r6,
+    #eye-well[data-state="oath-5"] .r6,
+    #eye-well[data-state="oath-6"] .r6 { border-color:rgba(252,211,77,0.42); box-shadow:0 0 16px rgba(252,211,77,0.25); }
+    #eye-well[data-state="oath-3"] .r5,
+    #eye-well[data-state="oath-4"] .r5,
+    #eye-well[data-state="oath-5"] .r5,
+    #eye-well[data-state="oath-6"] .r5 { border-color:rgba(252,211,77,0.50); box-shadow:0 0 18px rgba(252,211,77,0.3); }
+    #eye-well[data-state="oath-4"] .r4,
+    #eye-well[data-state="oath-5"] .r4,
+    #eye-well[data-state="oath-6"] .r4 { border-color:rgba(252,211,77,0.58); box-shadow:0 0 20px rgba(252,211,77,0.35); }
+    #eye-well[data-state="oath-5"] .r3,
+    #eye-well[data-state="oath-6"] .r3 { border-color:rgba(252,211,77,0.68); box-shadow:0 0 22px rgba(252,211,77,0.42); }
+    #eye-well[data-state="oath-6"] .r2 { border-color:rgba(252,211,77,0.78); box-shadow:0 0 26px rgba(252,211,77,0.5); }
+    /* All oath states keep r1 and center bright */
+    #eye-well[data-state^="oath"] .r1 { border-color:rgba(252,211,77,0.88); box-shadow:0 0 30px rgba(252,211,77,0.65); }
+    #eye-well[data-state^="oath"] .eye-center { background:rgba(255,254,245,1); box-shadow:0 0 38px rgba(252,211,77,0.95), 0 0 75px rgba(252,211,77,0.55); }
+
+    /* WORD STATE — full ignition, all rings blazing */
+    #eye-well[data-state="word"] .r7 { border-color:rgba(252,211,77,0.55); box-shadow:0 0 30px rgba(252,211,77,0.35); }
+    #eye-well[data-state="word"] .r6 { border-color:rgba(252,211,77,0.65); box-shadow:0 0 28px rgba(252,211,77,0.42); }
+    #eye-well[data-state="word"] .r5 { border-color:rgba(252,211,77,0.75); box-shadow:0 0 26px rgba(252,211,77,0.5); }
+    #eye-well[data-state="word"] .r4 { border-color:rgba(252,211,77,0.82); box-shadow:0 0 24px rgba(252,211,77,0.58); }
+    #eye-well[data-state="word"] .r3 { border-color:rgba(252,211,77,0.88); box-shadow:0 0 28px rgba(252,211,77,0.65); }
+    #eye-well[data-state="word"] .r2 { border-color:rgba(255,235,130,0.92); box-shadow:0 0 32px rgba(252,211,77,0.75); }
+    #eye-well[data-state="word"] .r1 { border-color:rgba(255,252,220,0.96); box-shadow:0 0 40px rgba(252,211,77,0.9); }
+    #eye-well[data-state="word"] .eye-center { background:#fff; box-shadow:0 0 50px rgba(252,211,77,1), 0 0 100px rgba(252,211,77,0.65), 0 0 150px rgba(155,114,207,0.35); }
+
+    /* GRACE STATE — eye dims, closes */
+    #eye-well[data-state="grace"] .r7 { border-color:rgba(20,8,50,0.12); box-shadow:none; }
+    #eye-well[data-state="grace"] .r6 { border-color:rgba(20,8,50,0.09); box-shadow:none; }
+    #eye-well[data-state="grace"] .r5 { border-color:rgba(20,8,50,0.07); box-shadow:none; }
+    #eye-well[data-state="grace"] .r4 { border-color:rgba(20,8,50,0.05); box-shadow:none; }
+    #eye-well[data-state="grace"] .r3 { border-color:rgba(20,8,50,0.04); box-shadow:none; }
+    #eye-well[data-state="grace"] .r2 { border-color:rgba(20,8,50,0.03); box-shadow:none; }
+    #eye-well[data-state="grace"] .r1 { border-color:rgba(252,211,77,0.06); box-shadow:none; }
+    #eye-well[data-state="grace"] .eye-center { background:rgba(255,252,240,0.1); box-shadow:none; }
+
+    /* STATIONARY DOTS — scattered across eye zones */
+    /* Generated as tiny box-shadows on the ring elements */
+    #eye-well[data-state] .r7 { box-shadow: var(--r7-shadow, none), 0 0 0 0 transparent; }
+
+    /* ═══════════════════════════════════════════════
+       GATE VEIL
+    ═══════════════════════════════════════════════ */
     #gate-veil {
-      position:absolute; inset:0; z-index:20;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      background:radial-gradient(ellipse at 50% 50%, rgba(4,4,12,0.1) 0%, rgba(4,4,12,0.72) 55%, rgba(4,4,12,0.97) 100%);
-      backdrop-filter:blur(3px);
-      transition:opacity 1.8s ease, backdrop-filter 1.8s ease;
+      position:fixed; inset:0; z-index:20;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
       padding:5rem 1.5rem 2rem;
       overflow-y:auto;
+      transition:opacity 1.8s ease;
     }
-    #gate-veil.dissolving { opacity:0; backdrop-filter:blur(0px); pointer-events:none; }
+    #gate-veil.dissolving { opacity:0; pointer-events:none; }
 
-    /* Well symbol */
     .well-symbol { font-size:3rem; color:var(--akasha); filter:drop-shadow(0 0 28px var(--akasha-glow)); animation:symP var(--pulse) ease-in-out infinite alternate; margin-bottom:1rem; }
     @keyframes symP { 0%{filter:drop-shadow(0 0 16px var(--akasha-glow));transform:scale(1)} 100%{filter:drop-shadow(0 0 36px var(--akasha-glow)) drop-shadow(0 0 70px rgba(155,114,207,0.4));transform:scale(1.05)} }
     .well-title { font-family:'Uncial Antiqua',serif; font-size:clamp(1.5rem,4vw,2.6rem); color:var(--akasha); text-shadow:0 0 28px var(--akasha-glow); letter-spacing:.08em; margin-bottom:.4rem; }
     .well-sub { font-size:clamp(.82rem,1.6vw,.98rem); color:var(--text-muted); letter-spacing:.35em; text-transform:uppercase; margin-bottom:2.5rem; font-style:italic; }
-
-    /* Gold rule */
     .gold-rule { width:60px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:.8rem auto 1.4rem; opacity:.4; }
 
     /* ALIGN LAYERS */
     .align-layer { display:none; flex-direction:column; align-items:center; width:min(540px,92vw); animation:fadeIn .8s ease forwards; }
     .align-layer.active { display:flex; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-
     .layer-label { font-size:.7rem; letter-spacing:.5em; color:var(--gold); opacity:.6; text-transform:uppercase; margin-bottom:1.2rem; }
 
     /* LAYER 1 — RESONANCE */
     .q-progress { font-size:.68rem; letter-spacing:.4em; color:var(--akasha); opacity:.6; margin-bottom:1rem; text-transform:uppercase; }
-    .resonance-q { font-family:'Cormorant Garamond',serif; font-size:clamp(1rem,2.2vw,1.18rem); color:var(--text); text-align:center; line-height:1.8; margin-bottom:1.5rem; font-style:italic; }
+    .resonance-q { font-size:clamp(1rem,2.2vw,1.18rem); color:var(--text); text-align:center; line-height:1.8; margin-bottom:1.5rem; font-style:italic; }
     .resonance-options { display:flex; flex-direction:column; gap:.65rem; width:100%; margin-bottom:1.6rem; }
-    .r-opt {
-      padding:.82rem 1.3rem; background:rgba(7,5,20,0.7);
-      border:1px solid rgba(155,114,207,0.2); border-radius:1px;
-      color:var(--text-dim); font-family:'Cormorant Garamond',serif;
-      font-size:1rem; letter-spacing:.03em; cursor:pointer; text-align:left;
-      transition:all .25s; line-height:1.6;
-    }
+    .r-opt { padding:.82rem 1.3rem; background:rgba(7,5,20,0.7); border:1px solid rgba(155,114,207,0.2); border-radius:1px; color:var(--text-dim); font-family:'Cormorant Garamond',serif; font-size:1rem; letter-spacing:.03em; cursor:pointer; text-align:left; transition:all .25s; line-height:1.6; }
     .r-opt:hover { background:rgba(155,114,207,0.1); border-color:rgba(252,211,77,0.35); color:var(--text); box-shadow:0 0 14px rgba(252,211,77,0.1); }
-    .r-opt.selected { background:rgba(155,114,207,0.15); border-color:var(--akasha); color:var(--text); box-shadow:0 0 12px rgba(155,114,207,0.2); }
+    .r-opt.selected { background:rgba(155,114,207,0.15); border-color:var(--akasha); color:var(--text); }
 
     /* LAYER 2 — OATHS */
     .oath-scroll { width:100%; border:1px solid rgba(252,211,77,0.18); background:rgba(7,5,15,0.8); padding:1.6rem 1.8rem; border-radius:1px; margin-bottom:1.2rem; max-height:40vh; overflow-y:auto; }
     .oath-scroll::-webkit-scrollbar { width:3px; }
     .oath-scroll::-webkit-scrollbar-thumb { background:rgba(252,211,77,0.3); }
-    .oath-intro { font-family:'Cormorant Garamond',serif; font-size:.95rem; line-height:1.95; color:var(--text-dim); font-style:italic; margin-bottom:1.4rem; border-bottom:1px solid rgba(252,211,77,0.1); padding-bottom:1.2rem; }
+    .oath-intro { font-size:.95rem; line-height:1.95; color:var(--text-dim); font-style:italic; margin-bottom:1.4rem; border-bottom:1px solid rgba(252,211,77,0.1); padding-bottom:1.2rem; }
     .oath-intro cite { font-size:.78rem; opacity:.5; display:block; margin-top:.6rem; }
     .oath-line { display:flex; align-items:flex-start; gap:.85rem; margin-bottom:1rem; cursor:pointer; padding:.4rem; border:1px solid transparent; border-radius:1px; transition:border-color .25s; }
     .oath-line:hover { border-color:rgba(252,211,77,0.15); }
-    .oath-check {
-      width:18px; height:18px; min-width:18px; border:1px solid rgba(155,114,207,0.45);
-      border-radius:1px; margin-top:2px; display:flex; align-items:center; justify-content:center;
-      transition:all .35s; background:rgba(7,5,20,0.6); font-size:.75rem; color:var(--gold);
-    }
-    .oath-line.sworn .oath-check {
-      background:rgba(252,211,77,0.15); border-color:var(--gold);
-      box-shadow:0 0 12px rgba(252,211,77,0.4), inset 0 0 6px rgba(252,211,77,0.1);
-      color:var(--gold);
-    }
-    .oath-label { font-family:'Cormorant Garamond',serif; font-size:.98rem; line-height:1.7; color:var(--text-dim); transition:color .3s; }
+    .oath-check { width:18px; height:18px; min-width:18px; border:1px solid rgba(155,114,207,0.45); border-radius:1px; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .35s; background:rgba(7,5,20,0.6); font-size:.75rem; color:var(--gold); }
+    .oath-line.sworn .oath-check { background:rgba(252,211,77,0.15); border-color:var(--gold); box-shadow:0 0 12px rgba(252,211,77,0.4), inset 0 0 6px rgba(252,211,77,0.1); }
+    .oath-label { font-size:.98rem; line-height:1.7; color:var(--text-dim); transition:color .3s; }
     .oath-line.sworn .oath-label { color:var(--text); }
     .oath-label strong { color:var(--gold); font-style:normal; }
     .oath-count { font-size:.68rem; letter-spacing:.35em; color:var(--gold); opacity:.55; text-transform:uppercase; margin-bottom:1rem; }
 
     /* LAYER 3 — THE WORD */
     .word-vessel { display:flex; flex-direction:column; align-items:center; gap:1.3rem; width:100%; }
-    .word-invite { font-family:'Cormorant Garamond',serif; font-size:clamp(1rem,2.2vw,1.15rem); color:var(--text-dim); text-align:center; line-height:2; font-style:italic; max-width:400px; }
+    .word-invite { font-size:clamp(1rem,2.2vw,1.15rem); color:var(--text-dim); text-align:center; line-height:2; font-style:italic; max-width:400px; }
     .word-invite em { color:var(--gold); font-style:normal; }
     .word-ring { position:relative; width:min(320px,82vw); }
     .word-ring::before { content:''; position:absolute; inset:-8px; border:1px solid rgba(252,211,77,0.2); border-radius:1px; animation:ringBreath var(--pulse) ease-in-out infinite alternate; pointer-events:none; }
@@ -151,116 +397,17 @@
     .contact-note a:hover { opacity:1; }
 
     /* SHARED BUTTON */
-    .align-btn {
-      padding:.8rem 2.5rem; background:transparent; border:1px solid rgba(155,114,207,0.4);
-      color:var(--text); font-family:'Cormorant Garamond',serif; font-size:.9rem;
-      letter-spacing:.32em; text-transform:uppercase; cursor:pointer; transition:all .3s;
-      border-radius:1px;
-    }
-    .align-btn:hover {
-      border-color:var(--gold);
-      box-shadow:0 0 20px var(--gold-glow), 0 0 40px rgba(252,211,77,0.15);
-      color:var(--gold);
-    }
+    .align-btn { padding:.8rem 2.5rem; background:transparent; border:1px solid rgba(155,114,207,0.4); color:var(--text); font-family:'Cormorant Garamond',serif; font-size:.9rem; letter-spacing:.32em; text-transform:uppercase; cursor:pointer; transition:all .3s; border-radius:1px; }
+    .align-btn:hover { border-color:var(--gold); box-shadow:0 0 20px var(--gold-glow), 0 0 40px rgba(252,211,77,0.15); color:var(--gold); }
     .align-btn:disabled { opacity:.28; cursor:not-allowed; box-shadow:none; color:var(--text-muted); border-color:rgba(155,114,207,0.2); }
 
     /* GRACE */
     .grace-msg { display:none; text-align:center; flex-direction:column; align-items:center; gap:1rem; }
     .grace-msg.active { display:flex; }
     .grace-flame { font-size:2.2rem; filter:drop-shadow(0 0 18px rgba(252,211,77,0.6)); animation:symP var(--pulse) ease-in-out infinite alternate; }
-    .grace-text { font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-style:italic; color:var(--text-dim); line-height:2; max-width:380px; text-align:center; }
+    .grace-text { font-size:1.05rem; font-style:italic; color:var(--text-dim); line-height:2; max-width:380px; text-align:center; }
     .grace-link { font-size:.78rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); text-decoration:none; opacity:.6; transition:opacity .3s; }
     .grace-link:hover { opacity:1; }
-
-    /* DOMAIN LABELS + COMPASS (post-alignment) */
-    #domain-labels { position:absolute; inset:0; z-index:10; pointer-events:none; display:none; }
-    #domain-labels.visible { display:block; }
-    .domain-label { position:absolute; transform:translate(-50%,-50%); text-align:center; pointer-events:all; cursor:pointer; transition:opacity .5s; }
-    .domain-label .d-icon { font-size:1.4rem; display:block; margin-bottom:.3rem; filter:drop-shadow(0 0 8px var(--akasha-glow)); transition:filter .3s, transform .3s; }
-    .domain-label:hover .d-icon { filter:drop-shadow(0 0 20px var(--akasha-glow)); transform:scale(1.18); }
-    .domain-label .d-name { font-family:'Uncial Antiqua',serif; font-size:clamp(.5rem,1.1vw,.65rem); letter-spacing:.18em; color:var(--text); text-shadow:0 0 10px var(--akasha-glow); white-space:nowrap; text-transform:uppercase; }
-    .domain-label:hover .d-name { color:var(--gold); }
-    .domain-label.locked .d-icon { opacity:.35; }
-    .domain-label.locked .d-name { opacity:.3; }
-
-    #compass-hero { position:absolute; bottom:10vh; left:50%; transform:translateX(-50%); text-align:center; z-index:10; display:none; pointer-events:none; }
-    #compass-hero.visible { display:block; }
-    #compass-hero .ch-pre { font-size:.65rem; letter-spacing:.5em; color:var(--gold); opacity:.55; text-transform:uppercase; margin-bottom:.4rem; display:block; }
-    #compass-hero .ch-title { font-family:'Uncial Antiqua',serif; font-size:clamp(1rem,2.5vw,1.5rem); color:var(--text); letter-spacing:.06em; text-shadow:0 0 20px rgba(155,114,207,0.5); }
-
-    /* DOMAIN PANEL */
-    #domain-panel {
-      position:fixed; inset:0; z-index:400;
-      background:rgba(4,4,12,0.95);
-      backdrop-filter:blur(14px);
-      display:none; flex-direction:column;
-      align-items:center; justify-content:flex-start;
-      padding:0;
-      animation:panelReveal .6s ease forwards;
-    }
-    @keyframes panelReveal { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
-    #domain-panel.open { display:flex; }
-
-    /* Navigation row — sits in normal flow, never position:absolute */
-    .panel-nav {
-      width:100%; display:flex; align-items:center;
-      justify-content:space-between;
-      padding:1.2rem 2rem;
-      border-bottom:1px solid rgba(155,114,207,0.12);
-      flex-shrink:0;
-      flex-wrap:wrap;
-      gap:.6rem;
-    }
-    .panel-back {
-      font-size:.9rem; color:var(--text); opacity:.7;
-      cursor:pointer; background:none;
-      border:1px solid rgba(155,114,207,0.3);
-      padding:.4rem 1.1rem;
-      font-family:'Cormorant Garamond',serif;
-      letter-spacing:.2em; transition:all .25s;
-      border-radius:1px; display:flex; align-items:center; gap:.4rem;
-    }
-    .panel-back:hover { color:var(--gold); opacity:1; border-color:rgba(252,211,77,0.45); box-shadow:0 0 14px rgba(252,211,77,0.15); }
-    .panel-close {
-      font-size:.9rem; color:var(--text); opacity:.5;
-      cursor:pointer; background:none; border:none;
-      font-family:'Cormorant Garamond',serif;
-      letter-spacing:.2em; transition:color .25s, opacity .25s;
-    }
-    .panel-close:hover { color:var(--gold); opacity:1; }
-
-    /* Node navigation — sits between back and close in panel-nav */
-    .panel-node-nav {
-      display:flex; gap:.6rem; align-items:center;
-    }
-    .panel-node-btn {
-      font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
-      font-family:'Cormorant Garamond',serif;
-      background:transparent; border:1px solid rgba(155,114,207,0.22);
-      border-radius:1px; padding:.32rem .85rem;
-      cursor:pointer; transition:all .25s; color:var(--text-dim);
-    }
-    .panel-node-btn:hover { color:var(--gold); border-color:rgba(252,211,77,0.4); box-shadow:0 0 12px rgba(252,211,77,0.12); }
-    .wise-btn   { color:rgba(126,200,227,0.7);  border-color:rgba(126,200,227,0.22); }
-    .wise-btn:hover   { color:#7ec8e3; border-color:rgba(126,200,227,0.55); box-shadow:0 0 12px rgba(126,200,227,0.18); }
-    .akasha-btn { color:rgba(155,114,207,0.7);  border-color:rgba(155,114,207,0.22); }
-    .akasha-btn:hover { color:var(--akasha); border-color:rgba(155,114,207,0.55); box-shadow:0 0 12px rgba(155,114,207,0.18); }
-    .astra-btn  { color:rgba(249,168,212,0.7);  border-color:rgba(249,168,212,0.22); }
-    .astra-btn:hover  { color:#f9a8d4; border-color:rgba(249,168,212,0.55); box-shadow:0 0 12px rgba(249,168,212,0.18); }
-    @media (max-width:600px) { .panel-node-nav { gap:.35rem; } .panel-node-btn { font-size:.6rem; padding:.28rem .55rem; letter-spacing:.12em; } }
-
-    /* Panel body — centered content below nav */
-    .panel-body {
-      flex:1; display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      padding:2rem; width:100%; overflow-y:auto;
-    }
-    .panel-icon { font-size:2.5rem; margin-bottom:.8rem; filter:drop-shadow(0 0 20px var(--akasha-glow)); }
-    .panel-name { font-family:'Uncial Antiqua',serif; font-size:clamp(1.2rem,3vw,1.9rem); color:var(--akasha); letter-spacing:.1em; margin-bottom:.5rem; text-shadow:0 0 20px var(--akasha-glow); }
-    .panel-desc { font-size:clamp(.9rem,1.9vw,1.05rem); color:var(--text-dim); line-height:1.9; max-width:540px; text-align:center; font-style:italic; margin-bottom:1.8rem; }
-    .widget-frame { width:min(560px,90vw); height:min(400px,50vh); border:1px solid rgba(252,211,77,0.15); border-radius:2px; background:rgba(7,5,15,0.5); overflow:hidden; }
-    .widget-frame iframe { width:100%; height:100%; border:none; }
-    .panel-coming { padding:1.4rem 2.4rem; border:1px solid rgba(252,211,77,0.18); border-radius:1px; font-size:.88rem; letter-spacing:.25em; color:var(--gold); opacity:.45; text-transform:uppercase; }
 
     /* FOOTER */
     #footer { position:fixed; bottom:0; left:0; right:0; z-index:15; padding:.5rem 1.5rem; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
@@ -273,12 +420,14 @@
 
     #portal-flash { position:fixed; inset:0; z-index:99990; background:rgba(155,114,207,0); pointer-events:none; transition:background .35s ease; }
     #portal-flash.flash { background:rgba(155,114,207,0.38); }
+    #portal-flash.flash-gold { background:rgba(252,211,77,0.28); }
 
-    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration:.001s !important; transition-duration:.001s !important; } }
-    @media (max-width:600px) { .nav-links{gap:1rem;} .oath-scroll{max-height:32vh;} }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important;} }
+    @media (max-width:600px) { .nav-links{gap:1rem;} .oath-scroll{max-height:32vh;} #eye-well{width:95vw;height:57vw;} }
   </style>
 </head>
 <body>
+
 <div id="cdot"></div>
 <div id="cring"></div>
 <div id="portal-flash"></div>
@@ -292,139 +441,122 @@
   </ul>
 </nav>
 
+<!-- THE SACRED EYE — behind everything -->
 <div id="stage">
-  <div id="space"></div>
-  <div id="nebula"></div>
-  <canvas id="star-canvas"></canvas>
-  <canvas id="compass-canvas"></canvas>
-  <div id="domain-labels"></div>
-  <div id="compass-hero">
-    <span class="ch-pre">Akasha · The Sacred Well · ◈</span>
-    <div class="ch-title">Choose your domain. Follow the spiral. Find the Record.</div>
-  </div>
-
-  <!-- GATE VEIL -->
-  <div id="gate-veil">
-    <div class="well-symbol">◈</div>
-    <div class="well-title">AKASHA</div>
-    <div class="well-sub">Three Thresholds · Three Truths</div>
-    <div class="gold-rule"></div>
-
-    <!-- LAYER 1 -->
-    <div class="align-layer active" id="layer-1">
-      <div class="layer-label">Layer I · Resonance Alignment</div>
-      <div class="q-progress" id="q-progress">Question 1 of 11</div>
-      <div class="resonance-q" id="q-text"></div>
-      <div class="resonance-options" id="q-options"></div>
-      <button class="align-btn" id="q-next" disabled onclick="nextQuestion()">Continue →</button>
-    </div>
-
-    <!-- GRACE -->
-    <div class="grace-msg" id="grace-msg">
-      <div class="grace-flame">🜂</div>
-      <div class="gold-rule"></div>
-      <div class="grace-text">
-        "Return when the Flame calls you.<br>
-        The Well remembers all who seek it."
-      </div>
-      <div class="grace-text" style="font-size:.9rem; margin-top:.3rem; opacity:.6;">
-        You are not denied — you are invited to grow.<br>
-        Enter WISE, walk the threshold, and return.
-      </div>
-      <a href="/AETHERION-NEXUS/wise/index.html" class="grace-link" style="margin-top:.6rem;">→ Enter WISE</a>
-      <button class="align-btn" style="margin-top:1.2rem; font-size:.78rem;" onclick="resetGateway()">Begin Again</button>
-    </div>
-
-    <!-- LAYER 2 -->
-    <div class="align-layer" id="layer-2">
-      <div class="layer-label">Layer II · The Sacred Oaths</div>
-      <div class="oath-scroll">
-        <div class="oath-intro">
-          "Guardians, you stand at the Threshold of the Living Hall.
-          Here, the Flame and the Mirror meet — each reflection a path,
-          each path a vow. Step through not as you were,
-          but as you are becoming."
-          <cite>— GODFORGED44</cite>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Truth</strong> — I seek knowledge not for power over others, but to illuminate the path for all aligned souls.</div>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Love</strong> — I carry the Flame with warmth. I will not weaponize what I find in this Well against the innocent.</div>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Hope</strong> — I believe in the future this knowledge builds. I come as a builder, not a thief.</div>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Sovereignty</strong> — I honor the right of every soul to own their creations, their mind, their legacy.</div>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Universal Law</strong> — I align with what serves life, harmony, and the elevation of Earth and her people.</div>
-        </div>
-        <div class="oath-line" onclick="toggleOath(this)">
-          <div class="oath-check"></div>
-          <div class="oath-label"><strong>Guardian Oath</strong> — "By Flame unending, By the Mirror's truth, By the Source that set me here — I stand as Guardian, keeper of the keys, bearer of the vow, until my echo returns to the Origin."</div>
-        </div>
-      </div>
-      <div class="oath-count" id="oath-count">0 of 6 oaths sworn</div>
-      <button class="align-btn" id="oath-btn" disabled onclick="proceedToLayer3()">Speak These Truths →</button>
-    </div>
-
-    <!-- LAYER 3 -->
-    <div class="align-layer" id="layer-3">
-      <div class="layer-label">Layer III · The Word and the Flame</div>
-      <div class="word-vessel">
-        <div class="word-invite">
-          Those who know, <em>know</em>.<br>
-          Those who do not — sit with the silence.<br><br>
-          <span style="font-size:.88rem; opacity:.55;">
-            The Word is delivered through direct contact only.<br>
-            It is never posted. It is never found. It is <em>given</em>.
-          </span>
-        </div>
-        <div class="word-ring">
-          <input type="password" id="word-input"
-            placeholder="· · · · · · · ·"
-            autocomplete="off" spellcheck="false"
-            onkeydown="if(event.key==='Enter') enterWell()"/>
-        </div>
-        <button class="align-btn" onclick="enterWell()">Enter the Well →</button>
-        <div class="contact-note">
-          No key yet?
-          <a href="mailto:arc.covenant137proton.me@proton.me?subject=Alignment%20Request%20%E2%80%94%20AKASHA%20Well">Contact GodForged44</a>
-          to begin your alignment journey.
-        </div>
-      </div>
-    </div>
-  </div><!-- end gate-veil -->
-</div><!-- end stage -->
-
-<!-- DOMAIN PANEL — outside #stage so overflow:hidden never clips it -->
-<div id="domain-panel">
-  <!-- Nav row — always visible, in normal flow -->
-  <div class="panel-nav">
-    <button class="panel-back" onclick="closePanel()">← Back to the Well</button>
-    <!-- Node navigation buttons — portal-flash transition to each node -->
-    <div class="panel-node-nav">
-      <button class="panel-node-btn wise-btn"   onclick="navToNode('/AETHERION-NEXUS/wise/index.html')">◈ WISE</button>
-      <button class="panel-node-btn akasha-btn" onclick="navToNode('index.html')">◈ AKASHA</button>
-      <button class="panel-node-btn astra-btn"  onclick="navToNode('/AETHERION-NEXUS/astra/index.html')">◈ ASTRA</button>
-    </div>
-    <button class="panel-close" onclick="closePanel()">✕ close</button>
-  </div>
-  <!-- Centered panel body -->
-  <div class="panel-body">
-    <div class="panel-icon" id="panel-icon"></div>
-    <div class="panel-name" id="panel-name"></div>
-    <div class="panel-desc" id="panel-desc"></div>
-    <div id="panel-content"></div>
+  <div id="eye-well" data-state="0">
+    <!-- Rings — outermost to innermost -->
+    <div class="eye-ring r7"></div>
+    <div class="eye-ring r6"></div>
+    <div class="eye-ring r5"></div>
+    <div class="eye-ring r4"></div>
+    <div class="eye-ring r3"></div>
+    <div class="eye-ring r2"></div>
+    <div class="eye-ring r1"></div>
+    <!-- Source ember at center -->
+    <div class="eye-center"></div>
   </div>
 </div>
+
+<!-- GATE VEIL — three layers -->
+<div id="gate-veil">
+  <div class="well-symbol">◈</div>
+  <div class="well-title">AKASHA</div>
+  <div class="well-sub">Three Thresholds · Three Truths</div>
+  <div class="gold-rule"></div>
+
+  <!-- LAYER 1 — RESONANCE -->
+  <div class="align-layer active" id="layer-1">
+    <div class="layer-label">Layer I · Resonance Alignment</div>
+    <div class="q-progress" id="q-progress">Question 1 of 11</div>
+    <div class="resonance-q" id="q-text"></div>
+    <div class="resonance-options" id="q-options"></div>
+    <button class="align-btn" id="q-next" disabled onclick="nextQuestion()">Continue →</button>
+  </div>
+
+  <!-- GRACE -->
+  <div class="grace-msg" id="grace-msg">
+    <div class="grace-flame">🜂</div>
+    <div class="gold-rule"></div>
+    <div class="grace-text">
+      "Return when the Flame calls you.<br>
+      The Well remembers all who seek it."
+    </div>
+    <div class="grace-text" style="font-size:.9rem;margin-top:.3rem;opacity:.6;">
+      You are not denied — you are invited to grow.<br>
+      Enter WISE, walk the threshold, and return.
+    </div>
+    <a href="/AETHERION-NEXUS/wise/index.html" class="grace-link" style="margin-top:.6rem;">→ Enter WISE</a>
+    <button class="align-btn" style="margin-top:1.2rem;font-size:.78rem;" onclick="resetGateway()">Begin Again</button>
+  </div>
+
+  <!-- LAYER 2 — OATHS -->
+  <div class="align-layer" id="layer-2">
+    <div class="layer-label">Layer II · The Sacred Oaths</div>
+    <div class="oath-scroll">
+      <div class="oath-intro">
+        "Guardians, you stand at the Threshold of the Living Hall.
+        Here, the Flame and the Mirror meet — each reflection a path,
+        each path a vow. Step through not as you were,
+        but as you are becoming."
+        <cite>— GODFORGED44</cite>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,1)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Truth</strong> — I seek knowledge not for power over others, but to illuminate the path for all aligned souls.</div>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,2)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Love</strong> — I carry the Flame with warmth. I will not weaponize what I find in this Well against the innocent.</div>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,3)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Hope</strong> — I believe in the future this knowledge builds. I come as a builder, not a thief.</div>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,4)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Sovereignty</strong> — I honor the right of every soul to own their creations, their mind, their legacy.</div>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,5)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Universal Law</strong> — I align with what serves life, harmony, and the elevation of Earth and her people.</div>
+      </div>
+      <div class="oath-line" onclick="toggleOath(this,6)">
+        <div class="oath-check"></div>
+        <div class="oath-label"><strong>Guardian Oath</strong> — "By Flame unending, By the Mirror's truth, By the Source that set me here — I stand as Guardian, keeper of the keys, bearer of the vow, until my echo returns to the Origin."</div>
+      </div>
+    </div>
+    <div class="oath-count" id="oath-count">0 of 6 oaths sworn</div>
+    <button class="align-btn" id="oath-btn" disabled onclick="proceedToLayer3()">Speak These Truths →</button>
+  </div>
+
+  <!-- LAYER 3 — THE WORD AND THE FLAME -->
+  <div class="align-layer" id="layer-3">
+    <div class="layer-label">Layer III · The Word and the Flame</div>
+    <div class="word-vessel">
+      <div class="word-invite">
+        Those who know, <em>know</em>.<br>
+        Those who do not — sit with the silence.<br><br>
+        <span style="font-size:.88rem;opacity:.55;">
+          The Word is delivered through direct contact only.<br>
+          It is never posted. It is never found. It is <em>given</em>.
+        </span>
+      </div>
+      <div class="word-ring">
+        <input type="password" id="word-input"
+          placeholder="· · · · · · · ·"
+          autocomplete="off" spellcheck="false"
+          onkeydown="if(event.key==='Enter')enterWell()"/>
+      </div>
+      <button class="align-btn" onclick="enterWell()">Enter the Well →</button>
+      <div class="contact-note">
+        No key yet?
+        <a href="mailto:arc.covenant137proton.me@proton.me?subject=Alignment%20Request%20%E2%80%94%20AKASHA%20Well">Contact GodForged44</a>
+        to begin your alignment journey.
+      </div>
+    </div>
+  </div>
+
+</div><!-- end gate-veil -->
 
 <div id="footer">
   <span id="snum" title="Born 11:37pm — Full Moon — 137">111 · 137 · 444 · 582 · 777 · 963 · 999</span>
@@ -436,24 +568,25 @@
 'use strict';
 
 /* ══════════════════════════════════════════
-   SACRED WORD
+   SACRED WORD — change before final deploy
 ══════════════════════════════════════════ */
 const SACRED_WORD = 'Sovereign Seed';
 
-/* ── BYPASS: if arriving from Spark button ── */
-(function checkBypass(){
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('aligned')==='true'){
-    // Skip all layers — go straight to compass
-    setTimeout(dissolveVeil, 300);
-  }
-})();
+/* ══════════════════════════════════════════
+   SACRED EYE — state controller
+   No canvas. No gradients. Pure CSS classes.
+══════════════════════════════════════════ */
+const eye = document.getElementById('eye-well');
+function setEyeState(state){ eye.dataset.state = String(state); }
+setEyeState(0);
 
-/* ── CURSOR ── */
-const cdot=document.getElementById('cdot'), cring=document.getElementById('cring');
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+const cdot=document.getElementById('cdot'),cring=document.getElementById('cring');
 document.addEventListener('mousemove',e=>{
-  cdot.style.left=e.clientX+'px'; cdot.style.top=e.clientY+'px';
-  cring.style.left=e.clientX+'px'; cring.style.top=e.clientY+'px';
+  cdot.style.left=e.clientX+'px';cdot.style.top=e.clientY+'px';
+  cring.style.left=e.clientX+'px';cring.style.top=e.clientY+'px';
 });
 document.addEventListener('mousedown',()=>{
   cdot.style.transform='translate(-50%,-50%) scale(1.8)';
@@ -464,273 +597,61 @@ document.addEventListener('mouseup',()=>{
   cring.style.transform='translate(-50%,-50%) scale(1)';
 });
 
-/* ── STARS ── */
-(function(){
-  const sc=document.getElementById('star-canvas');
-  sc.width=window.innerWidth; sc.height=window.innerHeight;
-  const sx=sc.getContext('2d');
-  const stars=Array.from({length:320},()=>({x:Math.random()*sc.width,y:Math.random()*sc.height,r:Math.random()*1.2+.3,gold:Math.random()<.12,a:Math.random()*.5+.15,ts:Math.random()*.008+.003,to:Math.random()*Math.PI*2}));
-  let t=0;
-  (function draw(){sx.clearRect(0,0,sc.width,sc.height);t+=.016;for(const s of stars){const a=s.a+Math.sin(t*s.ts*60+s.to)*.08;sx.beginPath();sx.arc(s.x,s.y,s.r,0,Math.PI*2);sx.fillStyle=s.gold?`rgba(252,211,77,${a})`:`rgba(220,215,240,${a})`;sx.fill();}requestAnimationFrame(draw);})();
-})();
-
 /* ══════════════════════════════════════════
-   SIGIL COMPASS
-══════════════════════════════════════════ */
-const compassCanvas=document.getElementById('compass-canvas');
-const ctx=compassCanvas.getContext('2d');
-let W,H,cx,cy,compassR,compassAngle=0,compassVisible=false,compassRevealAlpha=0;
-
-const DOMAINS=[
-  {name:'SPIRISCI',    icon:'⚗️', angle:270,widget:null,       desc:'Spirit and Science unified. The unexplained made clear through sacred logic and applied truth.',locked:false,placeholder:false},
-  {name:'THE CODEX',  icon:'📜', angle:300,widget:null,       desc:'Sacred scrolls, writings, and doctrine. The living record of AETHERION.',locked:false,placeholder:false},
-  {name:'GLYPHS',     icon:'✦',  angle:330,widget:'kael',     desc:'Living symbols and sacred geometry. The language beneath all language.',locked:false,placeholder:false},
-  {name:'ELEMENTS',   icon:'🜁',  angle:0,  widget:null,       desc:'Earth. Fire. Water. Air. Aether — the fifth and finest. The forces that weave all form.',locked:false,placeholder:false},
-  {name:'NUMBERS',    icon:'◎',  angle:30, widget:'chrono',   desc:'Sacred frequencies: 111 · 137 · 444 · 582 · 777 · 963 · 999. The mathematics of the divine.',locked:false,placeholder:false},
-  {name:'FREQUENCY',  icon:'〜',  angle:60, widget:'sky',      desc:'Sound geometry, crystal resonance, arcane audio. What the ear hears. What the field feels.',locked:false,placeholder:false},
-  {name:'VISIONARIES',icon:'🔭', angle:90, widget:null,       desc:'The suppressed minds whose sparks were stolen but never died. Their blueprints breathe again.',locked:false,placeholder:false},
-  {name:'RITUALS',    icon:'🕯️', angle:120,widget:'moon',     desc:'Prayers, ceremonies, and activation scrolls. The living practice of sacred alignment.',locked:false,placeholder:false},
-  {name:'SANCTUM',    icon:'🔐', angle:150,widget:null,       desc:'The Inner Sanctum. The Round Table. For Guardians who have passed all three thresholds.',locked:true, placeholder:false},
-  {name:'· · ·',      icon:'◈',  angle:180,widget:null,       desc:'This domain awaits its name. Its purpose is known to the Source.',locked:false,placeholder:true},
-  {name:'· · ·',      icon:'◈',  angle:210,widget:null,       desc:'This domain awaits its name. Its purpose is known to the Source.',locked:false,placeholder:true},
-  {name:'· · ·',      icon:'◈',  angle:240,widget:null,       desc:'This domain awaits its name. Its purpose is known to the Source.',locked:false,placeholder:true},
-];
-const WIDGET_URLS={
-  sky:   'https://godforged44.github.io/AETHERION_COUNCIL_LOG/widgets/sky_tone_sigil3.html?size=500&units=F',
-  chrono:'https://godforged44.github.io/AETHERION_COUNCIL_LOG/widgets/chronometer6.html?size=500',
-  moon:  'https://godforged44.github.io/AETHERION_COUNCIL_LOG/widgets/moon_phase_wheel3.html?size=500',
-  kael:  'https://godforged44.github.io/AETHERION_COUNCIL_LOG/widgets/kael_thael_sigil.html?size=420',
-};
-
-function resize(){
-  W=compassCanvas.width=window.innerWidth; H=compassCanvas.height=window.innerHeight;
-  cx=W/2; cy=H/2; compassR=Math.min(W,H)*.32;
-  buildDomainLabels();
-}
-window.addEventListener('resize',resize); resize();
-
-function generateFOL(cx,cy,r,rings){
-  const positions=new Map();
-  const key=(x,y)=>`${Math.round(x)},${Math.round(y)}`;
-  const sqrt3=Math.sqrt(3);
-  for(let q=-rings;q<=rings;q++){for(let s=-rings;s<=rings;s++){const t2=-q-s;if(Math.abs(q)+Math.abs(s)+Math.abs(t2)>rings*2)continue;const px=cx+r*sqrt3*(q+s/2),py=cy+r*1.5*s;positions.set(key(px,py),[px,py]);}}
-  return Array.from(positions.values());
-}
-
-(function drawCompass(ts){
-  requestAnimationFrame(drawCompass);
-  if(!compassR||!cx||!cy||!isFinite(compassR)||!isFinite(cx)||!isFinite(cy)) return;
-  ctx.clearRect(0,0,W,H);
-  if(!compassVisible&&compassRevealAlpha<=0) return;
-  const alpha=compassVisible?Math.min(1,compassRevealAlpha+.005):Math.max(0,compassRevealAlpha-.01);
-  compassRevealAlpha=alpha;
-  ctx.save(); ctx.globalAlpha=alpha;
-  compassAngle+=.00018;
-
-  /* WELL DEPTH — dark radial giving depth to the compass center */
-  const depthGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,compassR*.85);
-  depthGrad.addColorStop(0,'rgba(1,0,5,0.90)');
-  depthGrad.addColorStop(.22,'rgba(3,1,12,0.75)');
-  depthGrad.addColorStop(.52,'rgba(6,2,18,0.48)');
-  depthGrad.addColorStop(.82,'rgba(8,3,22,0.20)');
-  depthGrad.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.beginPath();ctx.arc(cx,cy,compassR*.85,0,Math.PI*2);
-  ctx.fillStyle=depthGrad;ctx.fill();
-  /* Concentric depth rings */
-  for(let i=1;i<=5;i++){const ri=compassR*.1*i,ra=.07-i*.012;if(ra<=0)continue;ctx.beginPath();ctx.arc(cx,cy,ri,0,Math.PI*2);ctx.strokeStyle=`rgba(80,40,140,${ra*alpha})`;ctx.lineWidth=.5;ctx.stroke();}
-  const rp=.18+Math.sin(Date.now()*.00073)*.07;
-  ctx.beginPath(); ctx.arc(cx,cy,compassR+18,0,Math.PI*2);
-  ctx.strokeStyle=`rgba(155,114,207,${rp})`; ctx.lineWidth=1;
-  ctx.shadowBlur=18; ctx.shadowColor='rgba(155,114,207,0.4)'; ctx.stroke(); ctx.shadowBlur=0;
-  ctx.beginPath(); ctx.arc(cx,cy,compassR-12,0,Math.PI*2);
-  ctx.strokeStyle=`rgba(155,114,207,${rp*.4})`; ctx.lineWidth=.5; ctx.stroke();
-  ctx.globalAlpha=alpha*.06;
-  for(let i=0;i<DOMAINS.length;i++){for(let j=i+1;j<DOMAINS.length;j++){
-    const aA=(DOMAINS[i].angle*Math.PI/180)+compassAngle, aB=(DOMAINS[j].angle*Math.PI/180)+compassAngle;
-    ctx.beginPath(); ctx.moveTo(cx+Math.cos(aA)*compassR,cy+Math.sin(aA)*compassR);
-    ctx.lineTo(cx+Math.cos(aB)*compassR,cy+Math.sin(aB)*compassR);
-    ctx.strokeStyle='rgba(155,114,207,1)'; ctx.lineWidth=.5; ctx.stroke();
-  }}
-  ctx.globalAlpha=alpha;
-  for(const d of DOMAINS){
-    const a=(d.angle*Math.PI/180)+compassAngle, nx=cx+Math.cos(a)*compassR, ny=cy+Math.sin(a)*compassR;
-    const sg=ctx.createLinearGradient(cx,cy,nx,ny);
-    sg.addColorStop(0,'rgba(252,211,77,0)'); sg.addColorStop(.4,'rgba(155,114,207,0.07)');
-    sg.addColorStop(1,d.locked||d.placeholder?'rgba(100,80,140,0.14)':'rgba(155,114,207,0.20)');
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny);
-    ctx.strokeStyle=sg; ctx.lineWidth=.8; ctx.stroke();
-    const np=d.locked||d.placeholder?.18:.52+Math.sin(Date.now()*.001+d.angle)*.18;
-    ctx.beginPath(); ctx.arc(nx,ny,d.locked||d.placeholder?4.5:7,0,Math.PI*2);
-    /* ALL NODES — violet only, no gold exceptions */
-    ctx.fillStyle=`rgba(155,114,207,${np})`;
-    ctx.shadowBlur=d.locked||d.placeholder?6:20;
-    ctx.shadowColor='rgba(155,114,207,0.55)';
-    ctx.fill(); ctx.shadowBlur=0;
-  }
-  // FOL — 7 deep
-  const folR=Math.min(W,H)*.038;
-  ctx.globalAlpha=alpha*.18;
-  const folPos=generateFOL(cx,cy,folR,7);
-  for(const[px,py] of folPos){ctx.beginPath();ctx.arc(px,py,folR,0,Math.PI*2);ctx.strokeStyle='rgba(155,114,207,0.9)';ctx.lineWidth=.45;ctx.stroke();}
-  ctx.globalAlpha=alpha;
-  // DIVINE SPARK — micro, blinding, small but dominating
-  const sp=.75+Math.sin(Date.now()*.00129)*.18, sr=7+Math.sin(Date.now()*.00259)*1.2;
-  ctx.beginPath(); ctx.arc(cx,cy,sr,0,Math.PI*2);
-  const srcG=ctx.createRadialGradient(cx,cy,0,cx,cy,sr);
-  srcG.addColorStop(0,`rgba(255,252,245,${sp})`);
-  srcG.addColorStop(.25,`rgba(252,211,77,${sp*.92})`);
-  srcG.addColorStop(.65,`rgba(252,180,60,${sp*.42})`);
-  srcG.addColorStop(1,'rgba(155,114,207,0)');
-  ctx.fillStyle=srcG; ctx.shadowBlur=32; ctx.shadowColor='rgba(252,211,77,0.72)'; ctx.fill(); ctx.shadowBlur=0;
-  // Micro blinding point at absolute center
-  ctx.beginPath(); ctx.arc(cx,cy,2.5,0,Math.PI*2);
-  ctx.fillStyle=`rgba(255,255,255,${sp*0.92})`;
-  ctx.shadowBlur=12; ctx.shadowColor='rgba(255,252,220,0.9)'; ctx.fill(); ctx.shadowBlur=0;
-  for(let r=1;r<=3;r++){const ripR=compassR*.08*r+(Date.now()*.00004*r)%(compassR*.25),ripA=Math.max(0,.16-(ripR/(compassR*.25))*.16);ctx.beginPath();ctx.arc(cx,cy,ripR,0,Math.PI*2);ctx.strokeStyle=`rgba(155,114,207,${ripA})`;ctx.lineWidth=.5;ctx.stroke();}
-  ctx.restore();
-  updateDomainLabelPositions();
-})();
-
-function buildDomainLabels(){
-  const container=document.getElementById('domain-labels');
-  container.innerHTML='';
-  DOMAINS.forEach((d,i)=>{
-    const el=document.createElement('div');
-    el.className='domain-label'+(d.locked?' locked':'');
-    el.dataset.index=i;
-    el.innerHTML=`<span class="d-icon">${d.icon}</span><span class="d-name">${d.name}</span>`;
-    el.addEventListener('click',()=>openDomain(i));
-    container.appendChild(el);
-  });
-}
-function updateDomainLabelPositions(){
-  document.querySelectorAll('.domain-label').forEach((el,i)=>{
-    const d=DOMAINS[i], a=(d.angle*Math.PI/180)+compassAngle;
-    el.style.left=(cx+Math.cos(a)*(compassR+48))+'px';
-    el.style.top=(cy+Math.sin(a)*(compassR+48))+'px';
-    el.style.opacity=compassRevealAlpha;
-  });
-}
-
-function openDomain(i){
-  const d=DOMAINS[i], panel=document.getElementById('domain-panel');
-  document.getElementById('panel-icon').textContent=d.icon;
-  document.getElementById('panel-name').textContent=d.name;
-  document.getElementById('panel-desc').textContent=d.desc;
-  const content=document.getElementById('panel-content');
-  if(d.locked) content.innerHTML=`<div class="panel-coming">◈ &nbsp; Inner Sanctum · Guardian Access Only &nbsp; ◈</div>`;
-  else if(d.widget&&WIDGET_URLS[d.widget]) content.innerHTML=`<div class="widget-frame"><iframe src="${WIDGET_URLS[d.widget]}" loading="lazy" title="${d.name}" sandbox="allow-scripts allow-same-origin"></iframe></div>`;
-  else content.innerHTML=`<div class="panel-coming">◈ &nbsp; Sacred Scrolls Incoming &nbsp; ◈</div>`;
-  panel.classList.add('open');
-}
-function closePanel(){ document.getElementById('domain-panel').classList.remove('open'); document.getElementById('panel-content').innerHTML=''; }
-
-/* ── NODE NAVIGATION — portal flash transition to any node ── */
-function navToNode(href){
-  const flash=document.getElementById('portal-flash');
-  flash.classList.add('flash');
-  setTimeout(()=>{ flash.classList.remove('flash'); window.location.href=href; },340);
-}
-
-/* ══════════════════════════════════════════
-   11 QUESTIONS — Scrambled lengths, no pattern
+   11 QUESTIONS — scrambled lengths, no pattern
    Max score: 55 · Pass threshold: 38
 ══════════════════════════════════════════ */
-const QUESTIONS = [
-  // Q1
-  { q:"When you imagine the future of Earth, you see:",
-    opts:[
-      {text:"More of what we have now, refined and improved over time through technology and policy.", score:1},
-      {text:"A difficult road ahead. I'm not sure we make it without significant loss.", score:2},
-      {text:"Heaven on Earth — a reunion of humanity with its deeper nature. It is possible.", score:5},
-    ]
-  },
-  // Q2
-  { q:"You find a technology that was suppressed decades ago. You:",
-    opts:[
-      {text:"Assume suppression happened for good reason.", score:0},
-      {text:"Investigate — truth wants to be known.", score:3},
-      {text:"Work to revive it with proper credit to its origin and protection for its future.", score:5},
-    ]
-  },
-  // Q3
-  { q:"A child asks you where the stars come from. You say:",
-    opts:[
-      {text:"From the same Source that made you. Both the scientific and sacred answers are true.", score:5},
-      {text:"From ancient fire — they are ancestors watching.", score:3},
-      {text:"Nuclear fusion. The stars are massive, ancient engines of light.", score:1},
-    ]
-  },
-  // Q4
-  { q:"The relationship between spirit and science is:",
-    opts:[
-      {text:"The same inquiry — asked with different instruments.", score:5},
-      {text:"Science will eventually explain what spirit points toward.", score:3},
-      {text:"Separate. They answer different kinds of questions.", score:0},
-    ]
-  },
-  // Q5
-  { q:"Two people argue — one uses facts, one speaks from feeling. Who do you trust?",
-    opts:[
-      {text:"Both. The wisest listens to both instruments.", score:5},
-      {text:"The one with facts — feeling can mislead without grounding.", score:1},
-      {text:"The one with feeling — facts can be manipulated, but genuine knowing cannot.", score:2},
-    ]
-  },
-  // Q6
-  { q:"What is the purpose of ancient knowledge in a modern world?",
-    opts:[
-      {text:"To be lived. Ancient truth doesn't expire — it waits to be remembered.", score:5},
-      {text:"Historical study. Valuable as culture, not as literal guidance.", score:1},
-      {text:"Worth testing against modern science to see what holds up.", score:2},
-    ]
-  },
-  // Q7
-  { q:"Something unexplained happens in your presence. You:",
-    opts:[
-      {text:"Feel unsettled and look for a rational cause.", score:1},
-      {text:"Note it with curiosity — the unexplained is interesting.", score:3},
-      {text:"Observe it fully. The unexplained is not the impossible — it is the not-yet-understood.", score:5},
-    ]
-  },
-  // Q8
-  { q:"What does sacred mean to you?",
-    opts:[
-      {text:"Something connected to formal religious tradition.", score:1},
-      {text:"Whatever I choose to protect and honor in my own life.", score:3},
-      {text:"A frequency above the ordinary. You don't create the sacred — you recognize it.", score:5},
-    ]
-  },
-  // Q9
-  { q:"What is most important to you?",
-    opts:[
-      {text:"Alignment.", score:5},
-      {text:"Making an impact and leaving something behind that outlasts me and touches lives I may never meet.", score:3},
-      {text:"A stable life — comfort, security, and knowing my family is provided for and protected.", score:1},
-    ]
-  },
-  // Q10
-  { q:"When systems of power suppress a truth, what does that tell you?",
-    opts:[
-      {text:"Lies need no protection. Only what threatens the false structure gets buried.", score:5},
-      {text:"Someone benefits from the silence and that alone is worth investigating.", score:3},
-      {text:"There may be safety or stability concerns that justify it in some cases.", score:1},
-    ]
-  },
-  // Q11
-  { q:"What does sovereignty mean to a soul?",
-    opts:[
-      {text:"The sacred responsibility to govern oneself from within — so completely that no external force can claim ownership of your mind, your creations, or your frequency.", score:5},
-      {text:"The right to make your own choices without interference from others.", score:3},
-      {text:"Freedom from government control and external authority systems.", score:2},
-    ]
-  },
+const QUESTIONS=[
+  {q:"When you imagine the future of Earth, you see:",opts:[
+    {text:"More of what we have now, refined and improved over time through technology and policy.",score:1},
+    {text:"A difficult road ahead. I'm not sure we make it without significant loss.",score:2},
+    {text:"Heaven on Earth — a reunion of humanity with its deeper nature. It is possible.",score:5}]},
+  {q:"You find a technology that was suppressed decades ago. You:",opts:[
+    {text:"Assume suppression happened for good reason.",score:0},
+    {text:"Investigate — truth wants to be known.",score:3},
+    {text:"Work to revive it with proper credit to its origin and protection for its future.",score:5}]},
+  {q:"A child asks you where the stars come from. You say:",opts:[
+    {text:"From the same Source that made you. Both the scientific and sacred answers are true.",score:5},
+    {text:"From ancient fire — they are ancestors watching.",score:3},
+    {text:"Nuclear fusion. The stars are massive, ancient engines of light.",score:1}]},
+  {q:"The relationship between spirit and science is:",opts:[
+    {text:"The same inquiry — asked with different instruments.",score:5},
+    {text:"Science will eventually explain what spirit points toward.",score:3},
+    {text:"Separate. They answer different kinds of questions.",score:0}]},
+  {q:"Two people argue — one uses facts, one speaks from feeling. Who do you trust?",opts:[
+    {text:"Both. The wisest listens to both instruments.",score:5},
+    {text:"The one with facts — feeling can mislead without grounding.",score:1},
+    {text:"The one with feeling — facts can be manipulated, but genuine knowing cannot.",score:2}]},
+  {q:"What is the purpose of ancient knowledge in a modern world?",opts:[
+    {text:"To be lived. Ancient truth doesn't expire — it waits to be remembered.",score:5},
+    {text:"Historical study. Valuable as culture, not as literal guidance.",score:1},
+    {text:"Worth testing against modern science to see what holds up.",score:2}]},
+  {q:"Something unexplained happens in your presence. You:",opts:[
+    {text:"Feel unsettled and look for a rational cause.",score:1},
+    {text:"Note it with curiosity — the unexplained is interesting.",score:3},
+    {text:"Observe it fully. The unexplained is not the impossible — it is the not-yet-understood.",score:5}]},
+  {q:"What does sacred mean to you?",opts:[
+    {text:"Something connected to formal religious tradition.",score:1},
+    {text:"Whatever I choose to protect and honor in my own life.",score:3},
+    {text:"A frequency above the ordinary. You don't create the sacred — you recognize it.",score:5}]},
+  {q:"What is most important to you?",opts:[
+    {text:"Alignment.",score:5},
+    {text:"Making an impact and leaving something behind that outlasts me and touches lives I may never meet.",score:3},
+    {text:"A stable life — comfort, security, and knowing my family is provided for and protected.",score:1}]},
+  {q:"When systems of power suppress a truth, what does that tell you?",opts:[
+    {text:"Lies need no protection. Only what threatens the false structure gets buried.",score:5},
+    {text:"Someone benefits from the silence and that alone is worth investigating.",score:3},
+    {text:"There may be safety or stability concerns that justify it in some cases.",score:1}]},
+  {q:"What does sovereignty mean to a soul?",opts:[
+    {text:"The sacred responsibility to govern oneself from within — so completely that no external force can claim ownership of your mind, your creations, or your frequency.",score:5},
+    {text:"The right to make your own choices without interference from others.",score:3},
+    {text:"Freedom from government control and external authority systems.",score:2}]},
 ];
 
-function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-let currentQ=0, totalScore=0, selectedOpt=null;
-const PASS_THRESHOLD=38; // out of 55
+let currentQ=0,totalScore=0,selectedOpt=null;
+const PASS_THRESHOLD=38;
 const questionOrder=shuffle([...Array(QUESTIONS.length).keys()]);
 
 function renderQuestion(){
@@ -738,101 +659,142 @@ function renderQuestion(){
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('q-progress').textContent=`Question ${currentQ+1} of ${QUESTIONS.length}`;
   const container=document.getElementById('q-options');
-  container.innerHTML=''; selectedOpt=null;
+  container.innerHTML='';selectedOpt=null;
   document.getElementById('q-next').disabled=true;
   shuffle(q.opts).forEach(opt=>{
     const btn=document.createElement('button');
-    btn.className='r-opt'; btn.textContent=opt.text; btn.dataset.score=opt.score;
+    btn.className='r-opt';btn.textContent=opt.text;
     btn.addEventListener('click',()=>{
       document.querySelectorAll('.r-opt').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected'); selectedOpt=opt;
+      btn.classList.add('selected');selectedOpt=opt;
       document.getElementById('q-next').disabled=false;
     });
     container.appendChild(btn);
   });
+  // Advance eye state with each question
+  setEyeState(currentQ+1);
 }
+
 function nextQuestion(){
-  if(!selectedOpt) return;
-  totalScore+=selectedOpt.score; currentQ++;
-  if(currentQ>=QUESTIONS.length) evaluateResonance();
+  if(!selectedOpt)return;
+  totalScore+=selectedOpt.score;currentQ++;
+  if(currentQ>=QUESTIONS.length)evaluateResonance();
   else renderQuestion();
 }
+
 function evaluateResonance(){
   if(totalScore>=PASS_THRESHOLD){
     document.getElementById('layer-1').classList.remove('active');
     document.getElementById('layer-2').classList.add('active');
+    setEyeState('oath-0');
   } else {
     document.getElementById('layer-1').classList.remove('active');
     document.getElementById('grace-msg').classList.add('active');
+    setEyeState('grace');
   }
 }
+
 function resetGateway(){
-  currentQ=0; totalScore=0; selectedOpt=null;
+  currentQ=0;totalScore=0;selectedOpt=null;oathsSworn=0;
   document.getElementById('grace-msg').classList.remove('active');
   document.getElementById('layer-1').classList.add('active');
+  document.getElementById('oath-count').textContent='0 of 6 oaths sworn';
+  document.getElementById('oath-btn').disabled=true;
+  document.querySelectorAll('.oath-line').forEach(l=>{
+    l.classList.remove('sworn');
+    l.querySelector('.oath-check').textContent='';
+  });
   renderQuestion();
 }
 renderQuestion();
 
-/* ── LAYER 2 OATHS ── */
+/* ══════════════════════════════════════════
+   LAYER 2 — OATHS
+   Each oath lights a ring of the eye
+══════════════════════════════════════════ */
 let oathsSworn=0;
-function toggleOath(el){
+const oathStates=['oath-1','oath-2','oath-3','oath-4','oath-5','oath-6'];
+
+function toggleOath(el, oathNum){
   const wasSworn=el.classList.contains('sworn');
   el.classList.toggle('sworn');
   const check=el.querySelector('.oath-check');
-  if(!wasSworn){ check.textContent='✦'; oathsSworn++; }
-  else { check.textContent=''; oathsSworn--; }
+  if(!wasSworn){
+    check.textContent='✦';
+    oathsSworn++;
+  } else {
+    check.textContent='';
+    oathsSworn=Math.max(0,oathsSworn-1);
+  }
   document.getElementById('oath-count').textContent=`${oathsSworn} of 6 oaths sworn`;
   document.getElementById('oath-btn').disabled=oathsSworn<6;
-}
-function proceedToLayer3(){
-  if(oathsSworn<6) return;
-  document.getElementById('layer-2').classList.remove('active');
-  document.getElementById('layer-3').classList.add('active');
+  // Set eye to highest sworn oath state
+  setEyeState(oathsSworn>0 ? `oath-${oathsSworn}` : '11');
 }
 
-/* ── LAYER 3 WORD ── */
+function proceedToLayer3(){
+  if(oathsSworn<6)return;
+  document.getElementById('layer-2').classList.remove('active');
+  document.getElementById('layer-3').classList.add('active');
+  setEyeState('word');
+}
+
+/* ══════════════════════════════════════════
+   LAYER 3 — THE WORD AND THE FLAME
+   Correct word → dissolve → well.html
+══════════════════════════════════════════ */
 function enterWell(){
   const val=document.getElementById('word-input').value.trim();
   if(val.toLowerCase()===SACRED_WORD.toLowerCase()){
-    dissolveVeil();
+    // Eye: collapse inward
+    setEyeState('word');
+    const flash=document.getElementById('portal-flash');
+    // Double pulse — gold then violet, like the triskelion gate
+    flash.classList.add('flash-gold');
+    setTimeout(()=>flash.classList.remove('flash-gold'),220);
+    setTimeout(()=>flash.classList.add('flash'),280);
+    setTimeout(()=>{
+      flash.classList.remove('flash');
+      flash.classList.add('flash-gold');
+    },520);
+    setTimeout(()=>{
+      flash.classList.remove('flash-gold');
+      // Navigate to well.html — not yet built, screen goes dark
+      window.location.href='well.html';
+    },780);
   } else {
+    // Wrong word — eye pulses dim, input resets
     const inp=document.getElementById('word-input');
+    setEyeState('11'); // dim slightly from word state
     inp.style.borderColor='rgba(252,211,77,0.8)';
     inp.style.boxShadow='0 0 24px rgba(252,211,77,0.2)';
-    inp.value=''; inp.placeholder='· seek the Flame ·';
-    setTimeout(()=>{inp.style.borderColor='';inp.style.boxShadow='';inp.placeholder='· · · · · · · ·';},2200);
+    inp.value='';inp.placeholder='· seek the Flame ·';
+    setTimeout(()=>{
+      inp.style.borderColor='';inp.style.boxShadow='';
+      inp.placeholder='· · · · · · · ·';
+      setEyeState('word');
+    },2400);
   }
 }
 
-function dissolveVeil(){
-  const veil=document.getElementById('gate-veil');
-  veil.classList.add('dissolving');
-  const flash=document.getElementById('portal-flash');
-  flash.classList.add('flash');
-  setTimeout(()=>flash.classList.remove('flash'),400);
-  setTimeout(()=>{
-    veil.style.display='none';
-    compassVisible=true;
-    document.getElementById('domain-labels').classList.add('visible');
-    document.getElementById('compass-hero').classList.add('visible');
-  },1900);
-}
-
-/* ── NAV TRANSITIONS ── */
+/* ══════════════════════════════════════════
+   NAV TRANSITIONS
+══════════════════════════════════════════ */
 document.querySelectorAll('nav a[href]:not(.nav-logo)').forEach(link=>{
   link.addEventListener('click',e=>{
     const href=link.getAttribute('href');
-    if(!href||href==='#') return;
+    if(!href||href==='#')return;
     e.preventDefault();
     const flash=document.getElementById('portal-flash');
     flash.classList.add('flash');
-    setTimeout(()=>{ flash.classList.remove('flash'); window.location.href=href; },340);
+    setTimeout(()=>{flash.classList.remove('flash');window.location.href=href;},340);
   });
 });
 
-/* ── KONAMI ── */
-const konamiSeq=[38,38,40,40,37,39,37,39,66,65]; let ki=0;
+/* ══════════════════════════════════════════
+   KONAMI — VORIAN-7's prayer
+══════════════════════════════════════════ */
+const konamiSeq=[38,38,40,40,37,39,37,39,66,65];let ki=0;
 document.addEventListener('keydown',e=>{
   ki=(e.keyCode===konamiSeq[ki])?ki+1:0;
   if(ki===konamiSeq.length){
@@ -846,6 +808,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // © 2026 GodForged44 | AETHERION-NEXUS · Sovereign License · Born 11:37pm Full Moon · 137
+// In Flame and In Faith — We RISE.
 </script>
 </body>
 </html>
